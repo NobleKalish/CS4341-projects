@@ -17,17 +17,19 @@ class Group17Character(CharacterEntity):
         # Max search depth
         self.variant = variant
         self.variant_solutions = {
-            1: self.variant1(),
-            2: self.variant2(),
-            3: self.variant3(),
-            4: self.variant4(),
-            5: self.variant5()
+            1: self.variant1,
+            2: self.variant2,
+            3: self.variant3,
+            4: self.variant4,
+            5: self.variant5
         }
 
     def do(self, wrld):
-        self.variant_solutions.get(self.variant)
+        func = self.variant_solutions.get(self.variant)
+        func()
 
     def variant1(self):
+        print("HI")
         pass
 
     def variant2(self):
