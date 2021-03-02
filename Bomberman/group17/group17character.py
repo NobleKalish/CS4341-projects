@@ -7,7 +7,7 @@ from entity import CharacterEntity
 from colorama import Fore, Back
 
 
-class TestCharacter(CharacterEntity):
+class Group17Character(CharacterEntity):
 
     def do(self, wrld):
         # Your code here
