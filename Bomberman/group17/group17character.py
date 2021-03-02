@@ -29,7 +29,6 @@ class Group17Character(CharacterEntity):
         func()
 
     def variant1(self):
-        print("HI")
         pass
 
     def variant2(self):
