@@ -48,7 +48,9 @@ class Group17Character(CharacterEntity):
 
 
     def variant2(self):
-        pass
+        ex_max = expectimax.Expectimax(self.world, self.max_depth, self.gamma, self)
+        move = ex_max.do_expectimax()
+        self.move(move[1], move[0])
 
     def variant3(self):
         ex_max = expectimax.Expectimax(self.world, self.max_depth, self.gamma, self)

@@ -22,6 +22,16 @@ class Expectimax:
             (1, 0): 6,
             (1, 1): 7
         }
+        self.keys = {
+            0: (-1, -1),
+            1: (-1, 0),
+            2: (-1, 1),
+            3: (0, -1),
+            4: (0, 1),
+            5: (1, -1),
+            6: (1, 0),
+            7: (1, 1),
+        }
 
     def _get_neighbors(self, current):
         neighbors = list()
@@ -45,13 +55,48 @@ class Expectimax:
         actions_and_worlds = self._get_player_actions(world)
         max_expected_values = list()
         depth = 0
-        self.expecti_max = np.zeros(8)
+        self.expecti_max = np.full(8, -math.inf)
         for action_and_world in actions_and_worlds:
-            self.expecti_max[self.actions.get(action_and_world[0])] = np.argmax(self._get_expected_value_numpy(action_and_world[1], action_and_world[2], depth))
-            max_expected_values.append(
-                (action_and_world[0], self._get_expected_value(action_and_world[1], action_and_world[2], depth)))
-        test = np.argmax(self.expecti_max)
-        return max(max_expected_values, key=itemgetter(1))[0]
+            self.expecti_max[self.actions.get(action_and_world[0])] = np.amax(self._get_expected_value_numpy(
+                action_and_world[1], action_and_world[2], depth))
+        return self.keys.get(np.argmax(self.expecti_max))
+
+    def _get_max_value_numpy(self, new_world, events, depth):
+        numpy_array = np.full(8, -math.inf)
+        depth += 1
+        if depth >= self.max_depth:
+            return self._utility(new_world, events)
+        actions_and_worlds = self._get_player_actions(new_world)
+        if actions_and_worlds is None:
+            return numpy_array
+        for action_and_world in actions_and_worlds:
+            p = 1/len(action_and_world)
+            numpy_array[self.actions.get(action_and_world[0])] = float(p * np.amax(self._get_expected_value_numpy(
+                action_and_world[1], action_and_world[2], depth)))
+        return numpy_array
+
+    def _get_expected_value_numpy(self, new_world, events, depth):
+        numpy_array = np.full(8, -math.inf)
+        depth += 1
+        if depth >= self.max_depth:
+            return self._utility(new_world, events)
+        actions_and_worlds = self._get_enemy_actions(new_world)
+        for action_and_world in actions_and_worlds:
+            p = 1/len(action_and_world)
+            numpy_array[self.actions.get(action_and_world[0])] = float(p * np.amax(
+                self._get_max_value_numpy(action_and_world[1], action_and_world[2], depth)))
+        return numpy_array
+
+    def _get_expected_value(self, new_world, events, depth):
+        depth += 1
+        if depth >= self.max_depth:
+            return self._utility(new_world, events)
+        v = 0
+        actions_and_worlds = self._get_enemy_actions(new_world)
+        for action_and_world in actions_and_worlds:
+            p = 1/8
+            v = v + p * self._get_max_value(action_and_world[1], action_and_world[2], depth)
+        return v
 
     def _get_max_value(self, new_world, events, depth):
         depth += 1
@@ -66,48 +111,26 @@ class Expectimax:
             v = v + p * self._get_expected_value(action_and_world[1], action_and_world[2], depth)
         return v
 
-    def _get_expected_value_numpy(self, new_world, events, depth):
-        depth += 1
-        if depth >= self.max_depth:
-            return self._utility(new_world, events)
-        v = 0
-        actions_and_worlds = self._get_enemy_actions(new_world)
-        for action_and_world in actions_and_worlds:
-            p = 1/8
-            v = v + p * self._get_max_value(action_and_world[1], action_and_world[2], depth)
-        return v
-
-    def _get_expected_value(self, new_world, events, depth):
-        depth += 1
-        if depth >= self.max_depth:
-            return self._utility(new_world, events)
-        v = 0
-        actions_and_worlds = self._get_enemy_actions(new_world)
-        for action_and_world in actions_and_worlds:
-            p = 1/8
-            v = v + p * self._get_max_value(action_and_world[1], action_and_world[2], depth)
-        return v
-
     def _utility(self, world, events):
         utility = 0
-        for event in events:
-            if event.tpe == Event.BOMB_HIT_MONSTER:
-                utility += 50
-            elif event.tpe == Event.BOMB_HIT_CHARACTER:
-                return -1000
-            elif event.tpe == Event.CHARACTER_KILLED_BY_MONSTER:
-                return -1000
-            elif event.tpe == Event.CHARACTER_FOUND_EXIT:
-                return 1000
-            elif event.tpe == Event.BOMB_HIT_WALL:
-                utility += 5
+        # for event in events:
+        #     if event.tpe == Event.BOMB_HIT_MONSTER:
+        #         utility += 50
+        #     elif event.tpe == Event.BOMB_HIT_CHARACTER:
+        #         return -1000
+        #     elif event.tpe == Event.CHARACTER_KILLED_BY_MONSTER:
+        #         return -1000
+        #     elif event.tpe == Event.CHARACTER_FOUND_EXIT:
+        #         return 1000
+        #     elif event.tpe == Event.BOMB_HIT_WALL:
+        #         utility += 5
         if world.me(self.character):
-            utility -= self._heuristic(world.exitcell, (world.me(self.character).x, world.me(self.character).y))
+            utility -= 100 - self._heuristic(world.exitcell, (world.me(self.character).x, world.me(self.character).y))
         else:
             return -1000
-        monsters = next(iter(world.monsters.values()))
-        for m in monsters:
-            utility -= 20 - math.ceil(self._heuristic((m.x, m.y), (world.me(self.character).x, world.me(self.character).y)))
+        # monsters = next(iter(world.monsters.values()))
+        # for m in monsters:
+        #     utility -= 20 - math.ceil(self._heuristic((m.x, m.y), (world.me(self.character).x, world.me(self.character).y)))
         return utility
 
     def _get_player_actions(self, world):
