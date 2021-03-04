@@ -1,31 +1,33 @@
 # This is necessary to find the main code
 import sys
+
 sys.path.insert(0, '../../bomberman')
 sys.path.insert(1, '..')
 
 # Import necessary stuff
 import random
-from game import Game
-from monsters.selfpreserving_monster import SelfPreservingMonster
+from Bomberman.bomberman.game import Game
+from Bomberman.bomberman.monsters.selfpreserving_monster import SelfPreservingMonster
 
 # TODO This is your code!
 sys.path.insert(1, '../group17')
-from testcharacter import TestCharacter
+from Bomberman.group17.group17character import Group17Character
 
 # Create the game
-random.seed(123) # TODO Change this if you want different random choices
+random.seed(123)  # TODO Change this if you want different random choices
 g = Game.fromfile('map.txt')
-g.add_monster(SelfPreservingMonster("selfpreserving", # name
-                                    "S",              # avatar
-                                    3, 9,             # position
-                                    1                 # detection range
-))
+g.add_monster(SelfPreservingMonster("selfpreserving",  # name
+                                    "S",  # avatar
+                                    3, 9,  # position
+                                    1  # detection range
+                                    ))
 
 # TODO Add your character
-g.add_character(TestCharacter("me", # name
-                              "C",  # avatar
-                              0, 0  # position
-))
+g.add_character(Group17Character("me",  # name
+                                 "C",  # avatar
+                                 0, 0,  # position
+                                 3  # variant
+                                 ))
 
 # Run!
-g.go()
+g.go(1)
