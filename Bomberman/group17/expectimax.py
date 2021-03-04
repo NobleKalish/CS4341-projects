@@ -53,7 +53,7 @@ class Expectimax:
     def do_expectimax(self):
         world = self.world
         actions_and_worlds = self._get_player_actions(world)
-        max_expected_values = list()
+        # max_expected_values = list()
         depth = 0
         self.expecti_max = np.full(8, -math.inf)
         for action_and_world in actions_and_worlds:
