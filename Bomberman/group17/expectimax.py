@@ -46,8 +46,8 @@ class Expectimax:
         return neighbors
 
     def _heuristic(self, goal, neighbor):
-        y_distance = goal[0] - neighbor[0]
-        x_distance = goal[1] - neighbor[1]
+        x_distance = goal[0] - neighbor[0]
+        y_distance = goal[1] - neighbor[1]
         return x_distance + y_distance
 
     def do_expectimax(self):
@@ -74,6 +74,8 @@ class Expectimax:
 
     def _get_max_value(self, new_world, events, depth):
         depth += 1
+        if not new_world.me(self.character):
+            return -10000
         if depth >= self.max_depth:
             return self._utility(new_world, events)
         v = -math.inf

@@ -56,6 +56,6 @@ class Astar:
         return neighbors
 
     def _heuristic(self, goal, neighbor):
-        y_distance = goal[0] - neighbor[0]
-        x_distance = goal[1] - neighbor[1]
+        x_distance = goal[0] - neighbor[0]
+        y_distance = goal[1] - neighbor[1]
         return x_distance + y_distance

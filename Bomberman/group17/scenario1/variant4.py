@@ -30,4 +30,4 @@ g.add_character(Group17Character("me", # name
 ))
 
 # Run!
-g.go(1)
+g.go(500)
