@@ -1,5 +1,6 @@
 # This is necessary to find the main code
 import sys
+
 sys.path.insert(0, '../../bomberman')
 sys.path.insert(1, '..')
 
@@ -8,17 +9,17 @@ from game import Game
 
 # TODO This is your code!
 sys.path.insert(1, '../group17')
-from testcharacter import TestCharacter
-
+from group17character import Group17Character
 
 # Create the game
-g = Game.fromfile('map.txt')
+g = Game.fromfile('../scenario2/map2.txt')
 
 # TODO Add your character
-g.add_character(TestCharacter("me", # name
-                              "C",  # avatar
-                              0, 0  # position
-))
+g.add_character(Group17Character("me",  # name
+                                 "C",  # avatar
+                                 0, 0,  # position
+                                 1
+                                 ))
 
 # Run!
-g.go()
+g.go(100)

@@ -35,13 +35,16 @@ class Astar:
             if current[1] == goal:
                 break
 
-            for next in self._get_neighbors(current[1]):
-                new_cost = cost_so_far[current[1]] + 1
-                if next not in cost_so_far or new_cost < cost_so_far[next]:
-                    cost_so_far[next] = new_cost
-                    priority = new_cost + self._heuristic(goal, next)
-                    frontier.put((priority, next))
-                    came_from[next] = current[1]
+            for next_neighbor in self._get_neighbors(current[1]):
+                if next_neighbor[1] == 1:
+                    new_cost = cost_so_far[current[1]] + 5
+                else:
+                    new_cost = cost_so_far[current[1]] + 1
+                if next_neighbor[0] not in cost_so_far or new_cost < cost_so_far[next_neighbor[0]]:
+                    cost_so_far[next_neighbor[0]] = new_cost
+                    priority = new_cost + self._heuristic(goal, next_neighbor[0])
+                    frontier.put((priority, next_neighbor[0]))
+                    came_from[next_neighbor[0]] = current[1]
         return came_from
 
     def _get_neighbors(self, current):
@@ -52,7 +55,9 @@ class Astar:
                     if (dx != 0) or (dy != 0):
                         if (current[1] + dy >= 0) and (current[1] + dy < self.world.height()):
                             if not self.world.wall_at(current[0] + dx, current[1] + dy):
-                                neighbors.append((current[0] + dx, current[1] + dy))
+                                neighbors.append(((current[0] + dx, current[1] + dy), 0))
+                            else:
+                                neighbors.append(((current[0] + dx, current[1] + dy), 1))
         return neighbors
 
     def _heuristic(self, goal, neighbor):

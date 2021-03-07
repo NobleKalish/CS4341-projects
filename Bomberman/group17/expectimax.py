@@ -20,7 +20,8 @@ class Expectimax:
             (0, 1): 4,
             (1, -1): 5,
             (1, 0): 6,
-            (1, 1): 7
+            (1, 1): 7,
+            (0, 0): 8
         }
         self.keys = {
             0: (-1, -1),
@@ -31,6 +32,7 @@ class Expectimax:
             5: (1, -1),
             6: (1, 0),
             7: (1, 1),
+            8: (0, 0)
         }
 
     def _get_neighbors(self, current):

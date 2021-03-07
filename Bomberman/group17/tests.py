@@ -26,7 +26,7 @@ def variant3():
 
 
 def main():
-    g = Game.fromfile('scenario1/map.txt')
+    g = Game.fromfile('scenario1/map2.txt')
     wins1 = 0
     wins2 = 0
     wins3 = 0
