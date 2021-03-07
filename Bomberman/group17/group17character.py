@@ -56,41 +56,37 @@ class Group17Character(CharacterEntity):
     def variant2(self):
         if self._check_for_monster(2):
             self.state = 1
+        if self.state == 0:
+            self.perform_a_star()
+        elif self.state == 1:
+            self.perform_expectimax(2)
         elif self.state == 2:
             dx, dy = self.bomb_state()
             if dx and dy:
                 self.move(dx, dy)
-        else:
-            self.state = 0
-        if self.state == 0:
-            self.perform_a_star()
-        elif self.state == 1:
-            self.perform_expectimax()
 
     def variant3(self):
         if self._check_for_monster(2):
             self.state = 1
-        else:
-            self.state = 0
         if self.state == 0:
             self.perform_a_star()
         elif self.state == 1:
-            self.perform_expectimax()
+            self.perform_expectimax(2)
 
     def variant4(self):
         if self._check_for_monster(3):
             self.state = 1
-        else:
-            self.state = 0
         if self.state == 0:
             self.perform_a_star()
         elif self.state == 1:
-            self.perform_expectimax()
+            self.perform_expectimax(3)
 
     def variant5(self):
         pass
 
     def _check_for_monster(self, limit):
+        if not self.world.monsters:
+            return False
         monsters = next(iter(self.world.monsters.values()))
         for m in monsters:
             if abs(m.x - self.x) <= limit and abs(m.y - self.y) <= limit:
@@ -109,13 +105,18 @@ class Group17Character(CharacterEntity):
             new_y = next_move[1] - self.y
             self.move(new_x, new_y)
 
-    def perform_expectimax(self):
+    def perform_expectimax(self, limit):
         ex_max = expectimax.Expectimax(self.world, 5, 0.9, self)
         ex_max.do_expectimax()
         ex_max_result = ex_max.do_expectimax()
-        new_x = ex_max_result[0] - self.x
-        new_y = ex_max_result[1] - self.y
+        new_x = ex_max_result[0]
+        new_y = ex_max_result[1]
         self.move(new_x, new_y)
+        if not self._check_for_monster(limit):
+            if self.bomb_move == 1:
+                self.state = 2
+            else:
+                self.state = 0
 
     def bomb_state(self):
         start_x = self.x
@@ -130,7 +131,7 @@ class Group17Character(CharacterEntity):
                                 return dx, dy
         else:
             if not self.world.bomb_at(self.bomb_at[0], self.bomb_at[1]):
-                if not self.world.explosion_at(self.bomb_at[0], self.bomb_at[1]+1):
+                if not self.world.explosion_at(self.bomb_at[0], self.bomb_at[1] + 1):
                     self.state = 0
                     self.bomb_move = 0
             return 0, 0

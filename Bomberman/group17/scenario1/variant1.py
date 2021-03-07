@@ -17,7 +17,7 @@ from group17.group17character import Group17Character
 # from interactivecharacter import InteractiveCharacter
 
 # Create the game
-g = Game.fromfile('map2.txt')
+g = Game.fromfile('map.txt')
 
 # TODO Add your character
 

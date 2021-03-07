@@ -106,6 +106,8 @@ class Expectimax:
             utility += 100 - self._heuristic(world.exitcell, (world.me(self.character).x, world.me(self.character).y))
         else:
             return -10000
+        if not self.world.monsters:
+            return utility
         monsters = next(iter(world.monsters.values()))
         for m in monsters:
             utility -= 1000 - 100*(self._heuristic((m.x, m.y), (world.me(self.character).x, world.me(self.character).y)))
@@ -122,6 +124,8 @@ class Expectimax:
     def _get_enemy_actions(self, world):
         fake_world = SensedWorld.from_world(world)
         actions_and_worlds = list()
+        if not self.world.monsters:
+            return actions_and_worlds
         monsters = next(iter(fake_world.monsters.values()))
         for m in monsters:
             actions_and_worlds.extend(self._get_new_actions(m, fake_world))
