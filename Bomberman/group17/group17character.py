@@ -2,11 +2,11 @@
 import sys
 import math
 
-from group17 import astar, expectimax
+from Bomberman.group17 import astar, expectimax
 
 sys.path.insert(0, '../bomberman')
 # Import necessary stuff
-from bomberman.entity import CharacterEntity
+from Bomberman.bomberman.entity import CharacterEntity
 from colorama import Fore, Back
 
 
@@ -26,6 +26,16 @@ class Group17Character(CharacterEntity):
             3: self.variant3,
             4: self.variant4,
             5: self.variant5
+        }
+        self.keys = {
+            0: (-1, -1),
+            1: (-1, 0),
+            2: (-1, 1),
+            3: (0, -1),
+            4: (0, 1),
+            5: (1, -1),
+            6: (1, 0),
+            7: (1, 1),
         }
         self.state = 0
 
@@ -86,4 +96,7 @@ class Group17Character(CharacterEntity):
 
     def perform_expectimax(self):
         ex_max = expectimax.Expectimax(self.world, 5, 0.9, self)
-        ex_max.do_expectimax()
+        ex_max_result = ex_max.do_expectimax()
+        new_x = ex_max_result[0] - self.x
+        new_y = ex_max_result[1] - self.y
+        self.move(new_x, new_y)
