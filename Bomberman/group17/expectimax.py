@@ -1,8 +1,9 @@
 import math
 import numpy as np
-from operator import itemgetter
-from bomberman.events import Event
-from bomberman.sensed_world import SensedWorld
+import sys
+sys.path.insert(0, '../bomberman')
+from events import Event
+from sensed_world import SensedWorld
 
 
 class Expectimax:
@@ -107,7 +108,7 @@ class Expectimax:
             return -10000
         monsters = next(iter(world.monsters.values()))
         for m in monsters:
-            utility -= 1000 - (self._heuristic((m.x, m.y), (world.me(self.character).x, world.me(self.character).y)))
+            utility -= 1000 - 100*(self._heuristic((m.x, m.y), (world.me(self.character).x, world.me(self.character).y)))
         return utility
 
     def _get_player_actions(self, world):
