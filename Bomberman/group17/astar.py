@@ -6,23 +6,21 @@ class Astar:
         self.world = world
         self.character = character
 
-    def get_next_move(self):
-        came_from = self._get_a_star()
+    def get_next_move(self, goal):
+        came_from = self._get_a_star(goal)
         x_start = self.character.x
         y_start = self.character.y
         start = (x_start, y_start)
-        goal = self.world.exitcell
         path = [goal]
         while path[0] != start:
             path.insert(0, came_from.get(path[0]))
         return path
 
-    def _get_a_star(self):
+    def _get_a_star(self, goal):
         frontier = PriorityQueue()
         x_start = self.character.x
         y_start = self.character.y
         start = (x_start, y_start)
-        goal = self.world.exitcell
         frontier.put((0, start))
         came_from = dict()
         cost_so_far = dict()
@@ -37,7 +35,7 @@ class Astar:
 
             for next_neighbor in self._get_neighbors(current[1]):
                 if next_neighbor[1] == 1:
-                    new_cost = cost_so_far[current[1]] + 5
+                    new_cost = cost_so_far[current[1]] + 2
                 else:
                     new_cost = cost_so_far[current[1]] + 1
                 if next_neighbor[0] not in cost_so_far or new_cost < cost_so_far[next_neighbor[0]]:

@@ -1,6 +1,9 @@
 import math
 import numpy as np
 import sys
+
+from group17 import astar
+
 sys.path.insert(0, '../bomberman')
 from events import Event
 from sensed_world import SensedWorld
@@ -48,16 +51,16 @@ class Expectimax:
                             neighbors.append((new_x, new_y))
         return neighbors
 
-    def _heuristic(self, goal, neighbor):
-        x_distance = goal[0] - neighbor[0]
-        y_distance = goal[1] - neighbor[1]
-        return x_distance + y_distance
+    def _heuristic(self, goal):
+        a_star = astar.Astar(self.world, self.character)
+        next_move = a_star.get_next_move(goal)
+        return len(next_move) - 1
 
     def do_expectimax(self):
         world = self.world
         actions_and_worlds = self._get_player_actions(world)
         depth = 0
-        self.expecti_max = np.full(8, -math.inf)
+        self.expecti_max = np.full(9, -math.inf)
         for action_and_world in actions_and_worlds:
             self.expecti_max[self.actions.get(action_and_world[0])] = self._get_expected_value(action_and_world[1], action_and_world[2], depth)
         return self.keys.get(np.argmax(self.expecti_max))
@@ -103,14 +106,15 @@ class Expectimax:
             elif event.tpe == Event.BOMB_HIT_WALL:
                 utility += 5
         if world.me(self.character):
-            utility += 100 - self._heuristic(world.exitcell, (world.me(self.character).x, world.me(self.character).y))
+            utility += 100 - self._heuristic(world.exitcell)
         else:
             return -10000
         if not self.world.monsters:
             return utility
-        monsters = next(iter(world.monsters.values()))
-        for m in monsters:
-            utility -= 1000 - 100*(self._heuristic((m.x, m.y), (world.me(self.character).x, world.me(self.character).y)))
+        if world.monsters:
+            monsters = next(iter(world.monsters.values()))
+            for m in monsters:
+                utility -= 1000 - 100*(self._heuristic((m.x, m.y)))
         return utility
 
     def _get_player_actions(self, world):
@@ -119,7 +123,11 @@ class Expectimax:
             m = fake_world.me(self.character)
         else:
             return None
-        return self._get_new_actions(m, fake_world)
+        player_actions = self._get_new_actions(m, fake_world)
+        m.place_bomb()
+        (new_world, events) = fake_world.next()
+        player_actions.append(((0, 0), new_world, events))
+        return player_actions
 
     def _get_enemy_actions(self, world):
         fake_world = SensedWorld.from_world(world)

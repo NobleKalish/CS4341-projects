@@ -72,6 +72,10 @@ class Group17Character(CharacterEntity):
             self.perform_a_star()
         elif self.state == 1:
             self.perform_expectimax(2)
+        elif self.state == 2:
+            dx, dy = self.bomb_state()
+            if dx and dy:
+                self.move(dx, dy)
 
     def variant4(self):
         if self._check_for_monster(3):
@@ -80,6 +84,10 @@ class Group17Character(CharacterEntity):
             self.perform_a_star()
         elif self.state == 1:
             self.perform_expectimax(3)
+        elif self.state == 2:
+            dx, dy = self.bomb_state()
+            if dx and dy:
+                self.move(dx, dy)
 
     def variant5(self):
         pass
@@ -95,7 +103,8 @@ class Group17Character(CharacterEntity):
 
     def perform_a_star(self):
         a_star = astar.Astar(self.world, self)
-        next_move = a_star.get_next_move()[1]
+        goal = self.world.exitcell
+        next_move = a_star.get_next_move(goal)[1]
         if self.world.wall_at(next_move[0], next_move[1]):
             self.state = 2
             self.bomb_at = (self.x, self.y)
@@ -111,7 +120,12 @@ class Group17Character(CharacterEntity):
         ex_max_result = ex_max.do_expectimax()
         new_x = ex_max_result[0]
         new_y = ex_max_result[1]
-        self.move(new_x, new_y)
+        if new_x == 0 and new_y == 0:
+            self.place_bomb()
+            self.bomb_at = (self.x, self.y)
+            self.state = 2
+        else:
+            self.move(new_x, new_y)
         if not self._check_for_monster(limit):
             if self.bomb_move == 1:
                 self.state = 2
