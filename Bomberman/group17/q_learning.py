@@ -6,6 +6,8 @@ class QLearning:
         self.rows = rows
         self.columns = columns
         self.q_values = np.zeros((rows, columns, 8))
+        self.x_start = 1
+        self.y_start = 1
         self.actions = ['up', 'right', 'down', 'left', 'top_left', 'top_right', 'bottom_left', 'bottom_right']
         self.rewards = None
 
@@ -32,12 +34,25 @@ class QLearning:
             return True
 
     def get_starting_location(self):
-        current_row_index = np.random.randint(self.rows)
-        current_column_index = np.random.randint(self.columns)
-        while self.is_terminal_state(current_row_index, current_column_index):
-            current_row_index = np.random.randint(self.rows)
-            current_column_index = np.random.randint(self.columns)
-        return current_row_index, current_column_index
+        if self.y_start < self.rows:
+            self.y_start += 1
+        elif self.x_start < self.columns:
+            self.x_start += 1
+            self.y_start = 1
+        else:
+            self.x_start = 1
+            self.y_start = 1
+        while self.is_terminal_state(self.rows - self.y_start, self.columns - self.x_start):
+            if self.y_start < self.rows:
+                self.y_start += 1
+            elif self.x_start < self.columns:
+                self.x_start += 1
+                self.y_start = 1
+            else:
+                self.x_start = 1
+                self.y_start = 1
+
+        return self.rows - self.y_start, self.columns - self.x_start
 
     def get_next_action(self, current_row_index, current_column_index, epsilon):
         if np.random.random() < epsilon:

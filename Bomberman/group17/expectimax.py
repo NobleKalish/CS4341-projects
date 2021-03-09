@@ -16,6 +16,7 @@ class Expectimax:
         self.gamma = gamma
         self.character = character
         self.expecti_max = None
+        self.bounds = (0, 100)
         self.actions = {
             (-1, -1): 0,
             (-1, 0): 1,
@@ -51,9 +52,9 @@ class Expectimax:
                             neighbors.append((new_x, new_y))
         return neighbors
 
-    def _heuristic(self, goal):
+    def _heuristic(self, goal, count_walls):
         a_star = astar.Astar(self.world, self.character)
-        next_move = a_star.get_next_move(goal)
+        next_move = a_star.get_next_move(goal, count_walls)
         return len(next_move) - 1
 
     def do_expectimax(self):
@@ -106,7 +107,7 @@ class Expectimax:
             elif event.tpe == Event.BOMB_HIT_WALL:
                 utility += 5
         if world.me(self.character):
-            utility += 100 - self._heuristic(world.exitcell)
+            utility += 100 - self._heuristic(world.exitcell, True)
         else:
             return -10000
         if not self.world.monsters:
@@ -114,7 +115,7 @@ class Expectimax:
         if world.monsters:
             monsters = next(iter(world.monsters.values()))
             for m in monsters:
-                utility -= 1000 - 100*(self._heuristic((m.x, m.y)))
+                utility -= 1000 - 100*(self._heuristic((m.x, m.y), True))
         return utility
 
     def _get_player_actions(self, world):

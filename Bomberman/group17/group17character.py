@@ -5,7 +5,7 @@ import math
 sys.path.insert(0, '../bomberman')
 # Import necessary stuff
 from entity import CharacterEntity
-from group17 import astar, expectimax
+from group17 import astar, expectimax, q_learning
 from colorama import Fore, Back
 
 
@@ -48,6 +48,8 @@ class Group17Character(CharacterEntity):
     def variant1(self):
         if self.state == 0:
             self.perform_a_star()
+        elif self.state == 1:
+            self.perform_expectimax(0)
         elif self.state == 2:
             dx, dy = self.bomb_state()
             if dx and dy:
@@ -86,7 +88,7 @@ class Group17Character(CharacterEntity):
             self.perform_expectimax(3)
         elif self.state == 2:
             dx, dy = self.bomb_state()
-            if dx and dy:
+            if dx != 0 or dy != 0:
                 self.move(dx, dy)
 
     def variant5(self):
@@ -132,6 +134,14 @@ class Group17Character(CharacterEntity):
             else:
                 self.state = 0
 
+    def perform_q_learning(self):
+        Q_learning = q_learning.QLearning(self.world.height(), self.world.width())
+        Q_learning.create_rewards(self.world)
+        Q_learning.print_grid()
+        Q_learning.train()
+        shortest_path = Q_learning.get_shortest_path(self.x, self.y)
+        self.move(shortest_path[0], shortest_path[1])
+
     def bomb_state(self):
         start_x = self.x
         start_y = self.y
@@ -142,6 +152,7 @@ class Group17Character(CharacterEntity):
                         if (start_y + dy >= 0) and (start_y + dy < self.world.height()):
                             if not self.world.wall_at(start_x + dx, start_y + dy):
                                 self.bomb_move = 1
+                                # self.state = 1
                                 return dx, dy
         else:
             if not self.world.bomb_at(self.bomb_at[0], self.bomb_at[1]):
