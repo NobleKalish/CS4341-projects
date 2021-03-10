@@ -52,7 +52,7 @@ class Group17Character(CharacterEntity):
             self.perform_expectimax(0)
         elif self.state == 2:
             dx, dy = self.bomb_state()
-            if dx and dy:
+            if dx != 0 or dy != 0:
                 self.move(dx, dy)
 
     def variant2(self):
@@ -64,7 +64,7 @@ class Group17Character(CharacterEntity):
             self.perform_expectimax(2)
         elif self.state == 2:
             dx, dy = self.bomb_state()
-            if dx and dy:
+            if dx != 0 or dy != 0:
                 self.move(dx, dy)
 
     def variant3(self):
@@ -76,7 +76,7 @@ class Group17Character(CharacterEntity):
             self.perform_expectimax(2)
         elif self.state == 2:
             dx, dy = self.bomb_state()
-            if dx and dy:
+            if dx != 0 or dy != 0:
                 self.move(dx, dy)
 
     def variant4(self):

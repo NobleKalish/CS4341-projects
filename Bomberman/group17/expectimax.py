@@ -115,7 +115,7 @@ class Expectimax:
         if world.monsters:
             monsters = next(iter(world.monsters.values()))
             for m in monsters:
-                utility -= 1000 - 100*(self._heuristic((m.x, m.y), True))
+                utility -= 1000 - 100*(self._heuristic((m.x, m.y), False))
         return utility
 
     def _get_player_actions(self, world):
