@@ -2,11 +2,11 @@ import math
 import numpy as np
 import sys
 
-from group17 import astar
+from Bomberman.group17 import astar
 
 sys.path.insert(0, '../bomberman')
-from events import Event
-from sensed_world import SensedWorld
+from Bomberman.bomberman.events import Event
+from Bomberman.bomberman.sensed_world import SensedWorld
 
 
 class Expectimax:
@@ -53,8 +53,10 @@ class Expectimax:
         return neighbors
 
     def _heuristic(self, goal, count_walls):
-        a_star = astar.Astar(self.world, self.character)
-        next_move = a_star.get_next_move(goal, count_walls)
+        print("checking a*)")
+        start = (self.character.x, self.character.y)
+        a_star = astar.Astar(self.world)
+        next_move = a_star.get_next_move(start, goal, count_walls=count_walls)
         return len(next_move) - 1
 
     def do_expectimax(self):

@@ -22,7 +22,7 @@ g.add_monster(StupidMonster("stupid", # name
 ))
 
 # TODO Add your character
-g.add_character(Group17Character("me", # name
+g.add_character(Group17Character("me",  # name
                               "C",  # avatar
                               0, 0,  # position
                                  2

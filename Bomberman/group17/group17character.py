@@ -4,8 +4,8 @@ import math
 
 sys.path.insert(0, '../bomberman')
 # Import necessary stuff
-from entity import CharacterEntity
-from group17 import astar, expectimax, q_learning, minimax
+from Bomberman.bomberman.entity import CharacterEntity
+from Bomberman.group17 import astar, expectimax, q_learning
 from colorama import Fore, Back
 
 
@@ -47,24 +47,24 @@ class Group17Character(CharacterEntity):
 
     def variant1(self):
         if self.state == 0:
-            self.perform_a_star()
+            self.perform_a_star(False)
         elif self.state == 1:
             self.perform_expectimax(0)
         elif self.state == 2:
             dx, dy = self.bomb_state()
-            if dx != 0 or dy != 0:
+            if dx and dy:
                 self.move(dx, dy)
 
     def variant2(self):
         if self._check_for_monster(2):
             self.state = 1
         if self.state == 0:
-            self.perform_a_star()
+            self.perform_a_star(True)
         elif self.state == 1:
             self.perform_expectimax(2)
         elif self.state == 2:
             dx, dy = self.bomb_state()
-            if dx != 0 or dy != 0:
+            if dx and dy:
                 self.move(dx, dy)
 
     def variant3(self):
@@ -76,7 +76,7 @@ class Group17Character(CharacterEntity):
             self.perform_expectimax(2)
         elif self.state == 2:
             dx, dy = self.bomb_state()
-            if dx != 0 or dy != 0:
+            if dx and dy:
                 self.move(dx, dy)
 
     def variant4(self):
@@ -85,7 +85,7 @@ class Group17Character(CharacterEntity):
         if self.state == 0:
             self.perform_a_star()
         elif self.state == 1:
-            self.perform_mini_max(3)
+            self.perform_expectimax(3)
         elif self.state == 2:
             dx, dy = self.bomb_state()
             if dx != 0 or dy != 0:
@@ -103,10 +103,11 @@ class Group17Character(CharacterEntity):
                 return True
         return False
 
-    def perform_a_star(self):
-        a_star = astar.Astar(self.world, self)
+    def perform_a_star(self, scary_monsters):
+        a_star = astar.Astar(self.world)
+        current_location = (self.x, self.y)
         goal = self.world.exitcell
-        next_move = a_star.get_next_move(goal)[1]
+        next_move = a_star.get_next_move(current_location, goal, scary_monsters=False)[1]
         if self.world.wall_at(next_move[0], next_move[1]):
             self.state = 2
             self.bomb_at = (self.x, self.y)
@@ -141,27 +142,6 @@ class Group17Character(CharacterEntity):
         Q_learning.train()
         shortest_path = Q_learning.get_shortest_path(self.x, self.y)
         self.move(shortest_path[0], shortest_path[1])
-
-    def perform_mini_max(self, limit):
-        monster = None
-        if self.world.monsters:
-            monsters = next(iter(self.world.monsters.values()))
-            for m in monsters:
-                if m.name == "aggressive":
-                    monster = m
-        Minimax = minimax.Minimax(self, 20, monster)
-        move = Minimax.alpha_beta_search(self.world)
-        if move[0] != 0 or move[1] != 0:
-            self.move(move[0], move[1])
-        else:
-            self.place_bome()
-            self.bomb_at = (move[0], move[1])
-            self.state = 2
-        if not self._check_for_monster(limit):
-            if self.bomb_move == 1:
-                self.state = 2
-            else:
-                self.state = 0
 
     def bomb_state(self):
         start_x = self.x
