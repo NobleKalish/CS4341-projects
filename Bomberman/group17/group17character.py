@@ -10,13 +10,17 @@ from colorama import Fore, Back
 
 
 class Group17Character(CharacterEntity):
-    # Class constructor.
-    #
-    # PARAM [string] name:      the name of this player
-    # PARAM [int]    max_depth: the maximum search depth
     def __init__(self, name, avatar, x, y, variant):
+        """
+            Parameters:
+                name (str): the name of this player
+                avatar (str): The character used to denote the player on the map.  Usually "C"
+                x (int): The starting x position of the player
+                y (int): The starting y position of the player
+                variant (int): Which variant of the AI is requested.  Current choices are 1-5
+        """
+
         super().__init__(name, avatar, x, y)
-        # Max search depth
         self.variant = variant
         self.bomb_move = 0
         self.bomb_at = None
@@ -28,6 +32,7 @@ class Group17Character(CharacterEntity):
             4: self.variant4,
             5: self.variant5
         }
+        # This section defines the possible moves from the current location
         self.keys = {
             0: (-1, -1),
             1: (-1, 0),
@@ -41,60 +46,84 @@ class Group17Character(CharacterEntity):
         self.state = 0
 
     def do(self, wrld):
+        """ Run the specified AI variant
+            Parameters:
+                wrld: The game world.  Contains the world map as well as monster positions
+        """
+
         self.world = wrld
         func = self.variant_solutions.get(self.variant)
         func()
 
     def variant1(self):
+        """ Run AI Variant 1"""
+
         if self.state == 0:
             self.perform_a_star(False)
         elif self.state == 1:
-            self.perform_expectimax(0)
+            self.perform_expectimax(5, 0)
         elif self.state == 2:
             dx, dy = self.bomb_state()
             if dx != 0 or dy != 0:
                 self.move(dx, dy)
 
     def variant2(self):
+        """ Run AI Variant 2"""
+
         if self._check_for_monster(2):
             self.state = 1
         if self.state == 0:
             self.perform_a_star(True)
         elif self.state == 1:
-            self.perform_expectimax(2)
+            self.perform_expectimax(3, 2)
         elif self.state == 2:
             dx, dy = self.bomb_state()
             if dx != 0 or dy != 0:
                 self.move(dx, dy)
 
     def variant3(self):
+        """ Run AI Variant 3"""
+
         if self._check_for_monster(2):
             self.state = 1
         if self.state == 0:
-            self.perform_a_star()
+            self.perform_a_star(True)
         elif self.state == 1:
-            self.perform_expectimax(2)
+            self.perform_expectimax(5, 2)
         elif self.state == 2:
             dx, dy = self.bomb_state()
             if dx != 0 or dy != 0:
                 self.move(dx, dy)
 
     def variant4(self):
+        """ Run AI Variant 4"""
+
         if self._check_for_monster(3):
             self.state = 1
         if self.state == 0:
-            self.perform_a_star()
+            self.perform_a_star(True)
         elif self.state == 1:
-            self.perform_expectimax(3)
+            self.perform_expectimax(5, 3)
         elif self.state == 2:
             dx, dy = self.bomb_state()
             if dx != 0 or dy != 0:
                 self.move(dx, dy)
 
     def variant5(self):
+        """ Run AI Variant 5"""
+
         pass
 
-    def _check_for_monster(self, limit):
+    def _check_for_monster(self, limit) -> bool:
+        """ Check for a monster within <limit> spaces
+
+            Parameters:
+                limit (int): The radius around the character to check for monsters.
+
+            Returns:
+                True if a monster is present within limit spaces
+        """
+
         if not self.world.monsters:
             return False
         monsters = next(iter(self.world.monsters.values()))
@@ -104,10 +133,16 @@ class Group17Character(CharacterEntity):
         return False
 
     def perform_a_star(self, scary_monsters):
+        """ Use A* search to perform one move
+
+            Parameters:
+                scary_monsters (bool): When True the search adds cost to spaces near monsters.
+        """
+
         a_star = astar.Astar(self.world)
         current_location = (self.x, self.y)
         goal = self.world.exitcell
-        next_move = a_star.get_next_move(current_location, goal, scary_monsters=False)[1]
+        next_move = a_star.get_next_move(current_location, goal, scary_monsters=scary_monsters)[1]
         if self.world.wall_at(next_move[0], next_move[1]):
             self.state = 2
             self.bomb_at = (self.x, self.y)
@@ -117,8 +152,15 @@ class Group17Character(CharacterEntity):
             new_y = next_move[1] - self.y
             self.move(new_x, new_y)
 
-    def perform_expectimax(self, limit):
-        ex_max = expectimax.Expectimax(self.world, 5, 0.9, self)
+    def perform_expectimax(self, depth, limit):
+        """ Use Expectimax to perform one move
+
+            Parameters:
+                depth (int): The depth to perform expectimax to.
+                limit (int): The radius to check for monsters when determining the next state.
+        """
+
+        ex_max = expectimax.Expectimax(self.world, depth, 0.9, self)
         ex_max.do_expectimax()
         ex_max_result = ex_max.do_expectimax()
         new_x = ex_max_result[0]
@@ -143,19 +185,26 @@ class Group17Character(CharacterEntity):
         shortest_path = Q_learning.get_shortest_path(self.x, self.y)
         self.move(shortest_path[0], shortest_path[1])
 
-    def perform_mini_max(self, limit):
+    def perform_mini_max(self, depth, limit):
+        """ Use Minimax to perform one move
+
+            Parameters:
+                depth (int): The depth to perform minimax to.
+                limit (int): The radius to check for monsters when determining the next state.
+        """
+
         monster = None
         if self.world.monsters:
             monsters = next(iter(self.world.monsters.values()))
             for m in monsters:
                 if m.name == "aggressive":
                     monster = m
-        Minimax = minimax.Minimax(self, 20, monster)
+        Minimax = minimax.Minimax(self, depth, monster)
         move = Minimax.alpha_beta_search(self.world)
         if move[0] != 0 or move[1] != 0:
             self.move(move[0], move[1])
         else:
-            self.place_bome()
+            self.place_bomb()
             self.bomb_at = (move[0], move[1])
             self.state = 2
         if not self._check_for_monster(limit):
@@ -164,7 +213,13 @@ class Group17Character(CharacterEntity):
             else:
                 self.state = 0
 
-    def bomb_state(self):
+    def bomb_state(self) -> (int, int):
+        """ Identify the best move given a bomb is on the map
+
+            Returns:
+                The [x,y] coordinates bomb_state recommends moving to.
+        """
+
         start_x = self.x
         start_y = self.y
         if self.bomb_move == 0:

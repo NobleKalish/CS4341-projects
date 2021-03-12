@@ -12,7 +12,7 @@ class Astar:
         """
         self.world = world
 
-    def get_next_move(self, start, goal, count_walls=True, scary_monsters=True):
+    def get_next_move(self, start, goal, count_walls=True, scary_monsters=True) -> list[tuple[int, int]]:
         """ Perform A* path planning from start to goal and return the path taken.
 
             Parameters:
@@ -49,8 +49,9 @@ class Astar:
             Returns:
                 came_from (dict[Union[tuple[int, int], tuple[int, int]]):
         """
+
         frontier = PriorityQueue()
-        frontier.put((0, start))
+        frontier.put((0, start))  # The 0 is there to maintain compatibility with future frontier entries
         came_from = dict()
         cost_so_far = dict()
         came_from[start] = None
@@ -82,7 +83,7 @@ class Astar:
                     came_from[next_neighbor[0]] = current
         return came_from
 
-    def _get_neighbors(self, current):
+    def _get_neighbors(self, current) -> list[tuple[tuple[int, int], int]]:
         """ Find all neighboring positions including walls
 
             Parameters:
@@ -92,6 +93,7 @@ class Astar:
                 neighbors (list[tuple[tuple[int, int], int]]): List of tuples.  Each neighbor takes the form
                     [[x, y], isWall?]. If the neighbor is a wall, isWall? will be 1.  Otherwise isWall? will be 0.
         """
+
         neighbors = list()
         for dx in [-1, 0, 1]:
             if (current[0] + dx >= 0) and (current[0] + dx < self.world.width()):
@@ -104,7 +106,7 @@ class Astar:
                                 neighbors.append(((current[0] + dx, current[1] + dy), 1))
         return neighbors
 
-    def _get_neighbors_without_walls(self, current):
+    def _get_neighbors_without_walls(self, current) -> list[tuple[tuple[int, int], int]]:
         """ Find all neighboring positions that aren't walls
 
             Parameters:
@@ -137,6 +139,7 @@ class Astar:
             Returns:
                 distance (int): the euclidean distance
         """
+
         x_distance = goal[0] - neighbor[0]
         y_distance = goal[1] - neighbor[1]
         return x_distance + y_distance

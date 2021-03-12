@@ -53,7 +53,6 @@ class Expectimax:
         return neighbors
 
     def _heuristic(self, goal, count_walls):
-        print("checking a*)")
         start = (self.character.x, self.character.y)
         a_star = astar.Astar(self.world)
         next_move = a_star.get_next_move(start, goal, count_walls=count_walls)
