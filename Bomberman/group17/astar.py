@@ -30,6 +30,8 @@ class Astar:
         """
 
         came_from = self._get_a_star(start, goal, count_walls, scary_monsters)
+        if not came_from.get(goal):
+            return list()
         path = [goal]
         while path[0] != start:
             path.insert(0, came_from.get(path[0]))
@@ -73,9 +75,10 @@ class Astar:
                 else:
                     new_cost = cost_so_far[current] + 1
                 if scary_monsters:  # Increase costs near monsters
-                    for monster in next(iter(self.world.monsters.values())):
-                        if self._heuristic((monster.x, monster.y), next_neighbor[0]) <= 3:
-                            new_cost += 2
+                    if self.world.monsters:
+                        for monster in next(iter(self.world.monsters.values())):
+                            if self._heuristic((monster.x, monster.y), next_neighbor[0]) <= 3:
+                                new_cost += 2
                 if next_neighbor[0] not in cost_so_far or new_cost < cost_so_far[next_neighbor[0]]:
                     cost_so_far[next_neighbor[0]] = new_cost
                     priority = new_cost + self._heuristic(goal, next_neighbor[0])

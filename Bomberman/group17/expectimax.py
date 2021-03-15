@@ -2,11 +2,11 @@ import math
 import numpy as np
 import sys
 
-from Bomberman.group17 import astar
+from group17 import astar
 
 sys.path.insert(0, '../bomberman')
-from Bomberman.bomberman.events import Event
-from Bomberman.bomberman.sensed_world import SensedWorld
+from bomberman.events import Event
+from bomberman.sensed_world import SensedWorld
 
 
 class Expectimax:
@@ -54,9 +54,11 @@ class Expectimax:
 
     def _heuristic(self, goal, count_walls):
         start = (self.character.x, self.character.y)
-        a_star = astar.Astar(self.world)
-        next_move = a_star.get_next_move(start, goal, count_walls=count_walls)
-        return len(next_move) - 1
+        # a_star = astar.Astar(self.world)
+        # next_move = a_star.get_next_move(start, goal, count_walls=count_walls)
+        x = goal[0] - start[0]
+        y = goal[1] - start[1]
+        return (x**2 + y**2)**0.5
 
     def do_expectimax(self):
         world = self.world
@@ -136,9 +138,10 @@ class Expectimax:
         actions_and_worlds = list()
         if not self.world.monsters:
             return actions_and_worlds
-        monsters = next(iter(fake_world.monsters.values()))
-        for m in monsters:
-            actions_and_worlds.extend(self._get_new_actions(m, fake_world))
+        if fake_world.monsters:
+            monsters = next(iter(fake_world.monsters.values()))
+            for m in monsters:
+                actions_and_worlds.extend(self._get_new_actions(m, fake_world))
         return actions_and_worlds
 
     def _get_new_actions(self, entity, fake_world):

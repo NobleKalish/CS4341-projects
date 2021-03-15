@@ -39,13 +39,13 @@ class Minimax:
             possible_moves.append(new_node)
         # Assign Starting Vals to find the best move
         highest_move_val = -math.inf
-        move = (0, 0)
+        next_move = (0, 0)
         # Find the column associated with the best move
         for move in possible_moves:
             if move.evaluation >= highest_move_val:
-                move = move.move
+                next_move = move.move
                 highest_move_val = move.evaluation
-        return move
+        return next_move
 
     # find the maximum assured score from a given board
     #
@@ -82,7 +82,7 @@ class Minimax:
     # RETURN [float] minimum assured score
     def min_value(self, world, depth, min_bound, max_bound):
         value = math.inf
-        if not world.me(self.monster):
+        if not world.monsters:
             return math.inf
         # If depth = 0, than we need to use the heuristic
         if depth == 0:
@@ -119,11 +119,13 @@ class Minimax:
         return utility
 
     def addBombAction(self, world):
+        action_and_world = list()
         fake_world = SensedWorld.from_world(world)
         entity = fake_world.me(self.character)
         entity.place_bomb()
         (new_world, events) = fake_world.next()
-        return [(0, 0), new_world, events]
+        action_and_world.append(((0, 0), new_world, events))
+        return action_and_world
 
     def ecludian_distance(self, start, goal):
         x = start[0] - goal[0]
@@ -132,4 +134,5 @@ class Minimax:
 
     def monster_get_evaluation(self, world):
         utility = 0
-        utility -= 300 - self.ecludian_distance((self.character.x, self.character.y), (self.monster.x, self.monster.y))
+        utility -= 10 - self.ecludian_distance((self.character.x, self.character.y), (self.monster.x, self.monster.y))
+        return utility
