@@ -4,6 +4,7 @@ import sys
 
 sys.path.insert(0, '../bomberman')
 from sensed_world import SensedWorld
+from events import Event
 
 
 class Minimax:
@@ -27,9 +28,10 @@ class Minimax:
         # For each possible move
         for successor in successors:
             new_world = successor[1]
+            events = successor[2]
             move = successor[0]
             # create new node, evaluation created by alpha-beta searching all possible children to max_depth
-            new_node = minimax_node.MinimaxNode(new_world, move, self.min_value(new_world, self.depth - 1, alpha, beta))
+            new_node = minimax_node.MinimaxNode(new_world, move, self.min_value(new_world, self.depth - 1, alpha, beta, events))
             # check if the move wins and if so return immediately
             if new_node.evaluation == math.inf:
                 return new_node.move
@@ -54,20 +56,21 @@ class Minimax:
     # PARAM [float] min_bound:
     # PARAM [float] max_bound:
     # RETURN [float] maximum assured score
-    def max_value(self, world, depth, min_bound, max_bound):
+    def max_value(self, world, depth, min_bound, max_bound, events):
         value = -math.inf
         # If node is terminal, than we have lost
         if not world.me(self.character):
             return -math.inf
         # If depth = 0, than we need to use the heuristic
         if depth == 0:
-            return self.get_evaluation(world)
+            return self.get_evaluation(world, events)
         # Now we evaluate each possible next move
         successors = self.get_successors(world, self.character)
         successors.extend(self.addBombAction(world))
         for successor in successors:
             world = successor[1]
-            value = max(value, self.min_value(world, depth - 1, min_bound, max_bound))
+            new_events = successor[2]
+            value = max(value, self.min_value(world, depth - 1, min_bound, max_bound, new_events))
             min_bound = max(value, min_bound)
             if min_bound >= max_bound:
                 return value
@@ -80,18 +83,19 @@ class Minimax:
     # PARAM [float] min_bound:
     # PARAM [float] max_bound:
     # RETURN [float] minimum assured score
-    def min_value(self, world, depth, min_bound, max_bound):
+    def min_value(self, world, depth, min_bound, max_bound, events):
         value = math.inf
         if not world.monsters:
             return math.inf
         # If depth = 0, than we need to use the heuristic
         if depth == 0:
-            return self.monster_get_evaluation(world)
+            return self.get_evaluation(world, events)
         # Now we evaluate each possible next move
         successors = self.get_successors(world, self.monster)
         for successor in successors:
             new_world = successor[1]
-            value = min(value, self.max_value(new_world, depth - 1, min_bound, max_bound))
+            new_events = successor[2]
+            value = min(value, self.max_value(new_world, depth - 1, min_bound, max_bound, new_events))
             max_bound = min(value, max_bound)
             if max_bound <= min_bound:
                 return value
@@ -111,11 +115,23 @@ class Minimax:
                                 actions_and_worlds.append(((dx, dy), new_world, events))
         return actions_and_worlds
 
-    def get_evaluation(self, world):
+    def get_evaluation(self, world, events):
         exit_cell = world.exitcell
         utility = 0
-        utility -= 100 - self.ecludian_distance((self.character.x, self.character.y), (self.monster.x, self.monster.y))
-        utility += 100 - self.ecludian_distance((self.character.x, self.character.y), (exit_cell.x, exit_cell.y))
+        for event in events:
+            if event.tpe == Event.BOMB_HIT_MONSTER:
+                utility += 50
+            elif event.tpe == Event.BOMB_HIT_CHARACTER:
+                return -10000
+            elif event.tpe == Event.CHARACTER_KILLED_BY_MONSTER:
+                return -10000
+            elif event.tpe == Event.CHARACTER_FOUND_EXIT:
+                return 10000
+            elif event.tpe == Event.BOMB_HIT_WALL:
+                utility += 5
+        utility -= 10 - self.ecludian_distance((self.character.x, self.character.y), (self.monster.x, self.monster.y))
+        utility += 10 - self.ecludian_distance((self.character.x, self.character.y), (exit_cell.x, exit_cell.y))
+        utility -= 10 - self.ecludian_distance((self.monster.x, self.monster.y), (exit_cell.x, exit_cell.y))
         return utility
 
     def addBombAction(self, world):
@@ -131,8 +147,3 @@ class Minimax:
         x = start[0] - goal[0]
         y = start[1] - goal[1]
         return (x**2 + y**2)**0.5
-
-    def monster_get_evaluation(self, world):
-        utility = 0
-        utility -= 10 - self.ecludian_distance((self.character.x, self.character.y), (self.monster.x, self.monster.y))
-        return utility

@@ -190,6 +190,8 @@ class Group17Character(CharacterEntity):
                 self.state = 2
             else:
                 self.state = 0
+        else:
+            self.state = 1
 
     def perform_mini_max(self, depth, limit):
         """ Use Minimax to perform one move
@@ -219,6 +221,8 @@ class Group17Character(CharacterEntity):
                 self.state = 2
             else:
                 self.state = 0
+        else:
+            self.state = 1
 
     def bomb_state(self):
         """ Identify the best move given a bomb is on the map
