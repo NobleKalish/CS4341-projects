@@ -12,13 +12,13 @@ class Astar:
         """
         self.world = world
 
-    def get_next_move(self, start, goal, count_walls=True, scary_monsters=True) -> list[tuple[int, int]]:
+    def get_a_star(self, start, goal, count_walls, scary_monsters) -> list[tuple[int, int]]:
         """ Perform A* path planning from start to goal and return the path taken.
 
             Parameters:
-                start (tuple[int, int]): The position to start the path from in the form (x,y).
+                start (tuple[int, int]): The position to start the path from in the form [x,y].
                     Usually the character's location
-                goal (tuple[int, int]): The position of the goal in the form (x,y)
+                goal (tuple[int, int]): The position of the goal in the form [x,y]
                 count_walls (bool): If True, paths through walls will be considered. This allows for planned bombing
                     (default is True)
                 scary_monsters (bool): If True, spaces within 3 of the monster will cost extra,
@@ -27,27 +27,6 @@ class Astar:
 
             Returns:
                 path (list[tuple[int, int]]): The list of every step on the optimal path from start to goal.
-        """
-
-        came_from = self._get_a_star(start, goal, count_walls, scary_monsters)
-        path = [goal]
-        while path[0] != start:
-            path.insert(0, came_from.get(path[0]))
-        return path
-
-    def _get_a_star(self, start, goal, count_walls, scary_monsters):
-        """ Perform A* path planning from start to goal and return
-
-            Parameters:
-                start (tuple[int, int]): The position to start the path from in the form (x,y).
-                    Usually the character's location
-                goal (tuple[int, int]): The position of the goal in the form (x,y)
-                count_walls (bool): If True: Paths through walls will be considered
-                scary_monsters (bool): If True, spaces within 3 of the monster will cost extra,
-                    incentivizing other routes.
-
-            Returns:
-                came_from (dict[Union[tuple[int, int], tuple[int, int]]):
         """
 
         frontier = PriorityQueue()
@@ -81,7 +60,10 @@ class Astar:
                     priority = new_cost + self._heuristic(goal, next_neighbor[0])
                     frontier.put((priority, next_neighbor[0]))
                     came_from[next_neighbor[0]] = current
-        return came_from
+        path = [goal]
+        while path[0] != start:
+            path.insert(0, came_from.get(path[0]))
+        return path
 
     def _get_neighbors(self, current) -> list[tuple[tuple[int, int], int]]:
         """ Find all neighboring positions including walls

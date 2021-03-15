@@ -142,7 +142,7 @@ class Group17Character(CharacterEntity):
         a_star = astar.Astar(self.world)
         current_location = (self.x, self.y)
         goal = self.world.exitcell
-        next_move = a_star.get_next_move(current_location, goal, scary_monsters=scary_monsters)[1]
+        next_move = a_star.get_a_star(current_location, goal, scary_monsters=scary_monsters)[1]
         if self.world.wall_at(next_move[0], next_move[1]):
             self.state = 2
             self.bomb_at = (self.x, self.y)
