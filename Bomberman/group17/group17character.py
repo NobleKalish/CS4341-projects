@@ -104,7 +104,7 @@ class Group17Character(CharacterEntity):
         if self.state == 0:
             self.perform_a_star(True)
         elif self.state == 1:
-            self.perform_mini_max(5, 3)
+            self.perform_expectimax(5, 3)
         elif self.state == 2:
             self.bomb_state()
         elif self.state == 3:
