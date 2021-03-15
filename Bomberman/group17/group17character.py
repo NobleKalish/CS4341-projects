@@ -104,7 +104,7 @@ class Group17Character(CharacterEntity):
         if self.state == 0:
             self.perform_a_star(True)
         elif self.state == 1:
-            self.perform_expectimax(5, 3)
+            self.perform_mini_max(5, 3)
         elif self.state == 2:
             self.bomb_state()
         elif self.state == 3:
@@ -119,7 +119,7 @@ class Group17Character(CharacterEntity):
         if self.state == 0:
             self.perform_a_star(True)
         elif self.state == 1:
-            self.perform_expectimax(5, 3)
+            self.perform_mini_max(5, 3)
         elif self.state == 2:
             self.bomb_state()
         elif self.state == 3:
@@ -154,7 +154,7 @@ class Group17Character(CharacterEntity):
         a_star = astar.Astar(self.world)
         current_location = (self.x, self.y)
         goal = self.world.exitcell
-        next_move = a_star.get_next_move(current_location, goal, count_walls=count_walls, scary_monsters=scary_monsters)[1]
+        next_move = a_star.get_a_star(current_location, goal, count_walls=count_walls, scary_monsters=scary_monsters)[1]
         if self.world.wall_at(next_move[0], next_move[1]):
             self.bomb_at = (self.x, self.y)
             self.place_bomb()
@@ -250,7 +250,7 @@ class Group17Character(CharacterEntity):
         a_star = astar.Astar(self.world)
         current_location = (self.x, self.y)
         goal = self.world.exitcell
-        next_move = a_star.get_next_move(current_location, goal, count_walls=False)
+        next_move = a_star.get_a_star(current_location, goal, count_walls=False, scary_monsters=False)
         if len(next_move) == 0:
             return False
         return True

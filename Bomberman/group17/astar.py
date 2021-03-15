@@ -12,31 +12,7 @@ class Astar:
         """
         self.world = world
 
-    def get_a_star(self, start, goal, count_walls, scary_monsters) -> list[tuple[int, int]]:
-        """ Perform A* path planning from start to goal and return the path taken.
-
-            Parameters:
-                start (tuple[int, int]): The position to start the path from in the form [x,y].
-                    Usually the character's location
-                goal (tuple[int, int]): The position of the goal in the form [x,y]
-                count_walls (bool): If True, paths through walls will be considered. This allows for planned bombing
-                    (default is True)
-                scary_monsters (bool): If True, spaces within 3 of the monster will cost extra,
-                    incentivizing other routes.
-                    (default is True)
-
-            Returns:
-                path (list[tuple[int, int]]): The list of every step on the optimal path from start to goal.
-        """
-        came_from = self._get_a_star(start, goal, count_walls, scary_monsters)
-        if not came_from.get(goal):
-            return list()
-        path = [goal]
-        while path[0] != start:
-            path.insert(0, came_from.get(path[0]))
-        return path
-
-    def _get_a_star(self, start, goal, count_walls, scary_monsters):
+    def get_a_star(self, start, goal, count_walls, scary_monsters):
         """ Perform A* path planning from start to goal and return
 
             Parameters:
@@ -82,10 +58,13 @@ class Astar:
                     priority = new_cost + self._heuristic(goal, next_neighbor[0])
                     frontier.put((priority, next_neighbor[0]))
                     came_from[next_neighbor[0]] = current
+        if not came_from.get(goal):
+            return list()
         path = [goal]
         while path[0] != start:
             path.insert(0, came_from.get(path[0]))
         return path
+
 
     def _get_neighbors(self, current) -> list[tuple[tuple[int, int], int]]:
         """ Find all neighboring positions including walls
