@@ -57,13 +57,16 @@ class Group17Character(CharacterEntity):
 
     def variant1(self):
         """ Run AI Variant 1"""
-
+        if self.check_for_direct_route():
+            self.state = 3
         if self.state == 0:
             self.perform_a_star(False)
         elif self.state == 1:
             self.perform_expectimax(5, 0)
         elif self.state == 2:
             self.bomb_state()
+        elif self.state == 3:
+            self.perform_a_star(False, False)
 
     def variant2(self):
         """ Run AI Variant 2"""
@@ -246,6 +249,8 @@ class Group17Character(CharacterEntity):
             self.move(0, 0)
 
     def check_for_direct_route(self):
+        if self._check_for_monster(2):
+            return False
         if self.world.monsters:
             monsters = next(iter(self.world.monsters.values()))
             for m in monsters:
