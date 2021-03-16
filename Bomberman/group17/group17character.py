@@ -32,17 +32,6 @@ class Group17Character(CharacterEntity):
             4: self.variant4,
             5: self.variant5
         }
-        # This section defines the possible moves from the current location
-        self.keys = {
-            0: (-1, -1),
-            1: (-1, 0),
-            2: (-1, 1),
-            3: (0, -1),
-            4: (0, 1),
-            5: (1, -1),
-            6: (1, 0),
-            7: (1, 1),
-        }
         self.state = 0
 
     def do(self, wrld):
@@ -123,10 +112,6 @@ class Group17Character(CharacterEntity):
             self.perform_a_star(True)
         elif self.state == 1:
             self.perform_expectimax(4, 3)
-            # if self.get_closest_monster() == "stupid":
-            #     self.perform_expectimax(4, 3)
-            # else:
-            #     self.perform_mini_max(4, 3)
         elif self.state == 2:
             self.bomb_state()
         elif self.state == 3:
@@ -142,12 +127,17 @@ class Group17Character(CharacterEntity):
                 True if a monster is present within limit spaces
         """
 
+        start = (self.x, self.y)
         if not self.world.monsters:
             return False
-        monsters = next(iter(self.world.monsters.values()))
-        for m in monsters:
-            if abs(m.x - self.x) <= limit and abs(m.y - self.y) <= limit:
-                return True
+        for value in self.world.monsters.values():
+            for m in value:
+                a_star = astar.Astar(self.world)
+                next_move = a_star.get_a_star(start, (m.x, m.y), False, False)
+                if len(next_move) == 0:
+                    return False
+                elif len(next_move)-1 <= limit:
+                    return True
         return False
 
     def perform_a_star(self, scary_monsters, count_walls=True):
@@ -192,13 +182,6 @@ class Group17Character(CharacterEntity):
             self.state = 2
         else:
             self.move(new_x, new_y)
-        if not self._check_for_monster(limit):
-            if self.bomb_move == 1:
-                self.state = 2
-            else:
-                self.state = 0
-        else:
-            self.state = 1
 
     def perform_mini_max(self, depth, limit):
         """ Use Minimax to perform one move

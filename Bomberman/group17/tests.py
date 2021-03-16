@@ -1,4 +1,5 @@
 import sys
+import random
 from group17.group17character import Group17Character
 
 sys.path.insert(0, '../bomberman')
@@ -8,6 +9,7 @@ from game import Game
 from monsters.stupid_monster import StupidMonster
 from monsters.selfpreserving_monster import SelfPreservingMonster
 
+step = 1
 
 def variant1(g):
     g.add_character(Group17Character("me",  # name
@@ -16,7 +18,7 @@ def variant1(g):
                                      1  # variant solution
                                      ))
     # Use this if you want to proceed automatically
-    g.go(1)
+    g.go(step)
     if g.world.scores["me"] > 0:
         return True
 
@@ -34,7 +36,7 @@ def variant2(g):
                                      ))
 
     # Run!
-    g.go(1)
+    g.go(step)
     if g.world.scores["me"] > 0:
         return True
 
@@ -53,7 +55,7 @@ def variant3(g):
                                      ))
 
     # Run!
-    g.go(1)
+    g.go(step)
     if g.world.scores["me"] > 0:
         return True
 
@@ -72,7 +74,7 @@ def variant4(g):
                                      ))
 
     # Run!
-    g.go(1)
+    g.go(step)
     if g.world.scores["me"] > 0:
         return True
 
@@ -95,13 +97,13 @@ def variant5(g):
                                      ))
 
     # Run!
-    g.go(1)
+    g.go(step)
     if g.world.scores["me"] > 0:
         return True
 
 
 def main():
-    test_amount = 20
+    test_amount = 10
     wins1 = 0
     wins2 = 0
     wins3 = 0
@@ -156,7 +158,7 @@ def main():
     print(f'We won {wins2} out of {test_amount} for variant 2')
     print(f'We won {wins3} out of {test_amount} for variant 3')
     print(f'We won {wins4} out of {test_amount} for variant 4')
-    print(f'We won {wins5} out of {test_amount} for variant 5\n\n')
+    print(f'We won {wins5} out of {test_amount} for variant 5\n')
     print(f'We won {wins1_2} out of {test_amount} for variant 1_2')
     print(f'We won {wins2_2} out of {test_amount} for variant 2_2')
     print(f'We won {wins3_2} out of {test_amount} for variant 3_2')

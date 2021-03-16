@@ -49,7 +49,7 @@ class Expectimax:
             8: (0, 0)
         }
 
-    def _heuristic(self, goal, count_walls):
+    def _heuristic(self, goal, world, count_walls):
         """ Evaluate the current board state and assign a score based on distance to goal
 
             Parameters:
@@ -60,15 +60,15 @@ class Expectimax:
             Returns:
                 The int score assigned to the board state in question
         """
-
-        start = (self.character.x, self.character.y)
-        # a_star = astar.Astar(self.world)
-        # next_move = a_star.get_next_move(start, goal, count_walls=count_walls)
-        # return len(next_move) - 1
+        me = world.me(self.character)
+        start = (me.x, me.y)
+        a_star = astar.Astar(self.world)
+        next_move = a_star.get_a_star(start, goal, count_walls=count_walls, scary_monsters=True)
+        return len(next_move) - 1
         ############ FOR THE MOMENT TO MAKE THINGS FASTER #####################
-        x = goal[0] - start[0]
-        y = goal[1] - start[1]
-        return (x**2 + y**2)**0.5
+        # x = goal[0] - start[0]
+        # y = goal[1] - start[1]
+        # return (x**2 + y**2)**0.5
 
     def do_expectimax(self) -> tuple[int, int]:
         """ Perform expectimax and return the recommended move.
@@ -109,8 +109,10 @@ class Expectimax:
         v = 0
         actions_and_worlds = self._get_enemy_actions(new_world)
         for action_and_world in actions_and_worlds:
+            new_events = action_and_world[2]
+            new_events.extend(events)
             p = 1/len(actions_and_worlds)
-            v = v + p * self._get_max_value(action_and_world[1], action_and_world[2], depth)
+            v = v + p * self._get_max_value(action_and_world[1], new_events, depth)
         return v
 
     def _get_max_value(self, new_world, events, depth) -> float:
@@ -135,10 +137,10 @@ class Expectimax:
             return self._utility(new_world, events)
         v = -math.inf
         actions_and_worlds = self._get_player_actions(new_world)
-        if actions_and_worlds is None:
-            return -1000
         for action_and_world in actions_and_worlds:
-            v = max(v, self._get_expected_value(action_and_world[1], action_and_world[2], depth))
+            new_events = action_and_world[2]
+            new_events.extend(events)
+            v = max(v, self._get_expected_value(action_and_world[1], new_events, depth))
         return v
 
     def _utility(self, world, events) -> int:
@@ -153,16 +155,13 @@ class Expectimax:
         """
 
         utility = self._check_events(events)
-        if world.me(self.character):
-            utility += 100 - self._heuristic(world.exitcell, True)
-        else:
-            return -10000
+        utility -= 5*self._heuristic(world.exitcell, world, True)
         if not self.world.monsters:
             return utility
         if world.monsters:
             for value in self.world.monsters.values():
                 for m in value:
-                    utility -= 100 - (self._heuristic((m.x, m.y), False))
+                    utility += 5*(self._heuristic((m.x, m.y), world, False))
         return utility
 
     def _get_player_actions(self, world) -> list[tuple[tuple[int, int], SensedWorld, list[Event]]]:
@@ -176,11 +175,7 @@ class Expectimax:
         """
 
         fake_world = SensedWorld.from_world(world)
-        if fake_world.me(self.character):
-            m = fake_world.me(self.character)
-        else:
-            return None
-            # TODO: Would this ever be called?  Does it matter?
+        m = fake_world.me(self.character)
         player_actions = self._get_new_actions(m, fake_world)
         m.place_bomb()
         (new_world, events) = fake_world.next()

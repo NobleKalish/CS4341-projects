@@ -131,9 +131,11 @@ class Minimax:
                 return 10000
             elif event.tpe == Event.BOMB_HIT_WALL:
                 utility += 5
-        utility -= 10 - self.ecludian_distance((self.character.x, self.character.y), (self.monster.x, self.monster.y))
-        utility += 10 - self.ecludian_distance((self.character.x, self.character.y), (exit_cell[0], exit_cell[1]))
-        utility -= 10 - self.ecludian_distance((self.monster.x, self.monster.y), (exit_cell[0], exit_cell[1]))
+        me = world.me(self.character)
+        monster = world.me(self.monster)
+        utility += 5*self.ecludian_distance((me.x, me.y), (monster.x, monster.y))
+        utility -= 5*self.ecludian_distance((me.x, me.y), (exit_cell[0], exit_cell[1]))
+        utility += 3*self.ecludian_distance((monster.x, monster.y), (exit_cell[0], exit_cell[1]))
         return utility
 
     def addBombAction(self, world):
