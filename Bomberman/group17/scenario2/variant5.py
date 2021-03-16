@@ -30,7 +30,7 @@ g.add_monster(SelfPreservingMonster("aggressive", # name
 g.add_character(Group17Character("me", # name
                               "C",  # avatar
                               0, 0,  # position
-                                 4
+                                 5
 ))
 
 # Run!

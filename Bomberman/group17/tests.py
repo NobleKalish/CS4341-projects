@@ -49,7 +49,7 @@ def variant3(g):
     g.add_character(Group17Character("me",  # name
                                      "C",  # avatar
                                      0, 0,  # position
-                                     2
+                                     3
                                      ))
 
     # Run!
@@ -68,7 +68,7 @@ def variant4(g):
     g.add_character(Group17Character("me",  # name
                                      "C",  # avatar
                                      0, 0,  # position
-                                     2
+                                     4
                                      ))
 
     # Run!
@@ -91,7 +91,7 @@ def variant5(g):
     g.add_character(Group17Character("me",  # name
                                      "C",  # avatar
                                      0, 0,  # position
-                                     2
+                                     5
                                      ))
 
     # Run!

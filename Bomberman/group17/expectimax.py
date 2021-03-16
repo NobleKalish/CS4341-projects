@@ -187,9 +187,9 @@ class Expectimax:
         if not self.world.monsters:
             return utility
         if world.monsters:
-            monsters = next(iter(world.monsters.values()))
-            for m in monsters:
-                utility -= 1000 - 100*(self._heuristic((m.x, m.y), False))
+            for value in self.world.monsters.values():
+                for m in value:
+                    utility -= 1000 - 100*(self._heuristic((m.x, m.y), False))
         return utility
 
     def _get_player_actions(self, world) -> list[tuple[tuple[int, int], SensedWorld, list[Event]]]:
@@ -228,10 +228,10 @@ class Expectimax:
         actions_and_worlds = list()
         if not self.world.monsters:
             return actions_and_worlds
-        if fake_world.monsters:
-            monsters = next(iter(fake_world.monsters.values()))
-            for m in monsters:
-                actions_and_worlds.extend(self._get_new_actions(m, fake_world))
+        else:
+            for value in self.world.monsters.values():
+                for m in value:
+                    actions_and_worlds.extend(self._get_new_actions(m, fake_world))
         return actions_and_worlds
 
     @staticmethod

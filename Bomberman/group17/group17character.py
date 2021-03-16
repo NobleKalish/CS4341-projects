@@ -57,7 +57,7 @@ class Group17Character(CharacterEntity):
 
     def variant1(self):
         """ Run AI Variant 1"""
-        if self.check_for_direct_route():
+        if self.check_for_direct_route(1):
             self.state = 3
         if self.state == 0:
             self.perform_a_star(False)
@@ -70,7 +70,7 @@ class Group17Character(CharacterEntity):
 
     def variant2(self):
         """ Run AI Variant 2"""
-        if self.check_for_direct_route():
+        if self.check_for_direct_route(1):
             self.state = 3
         elif self._check_for_monster(2):
             self.state = 1
@@ -85,14 +85,14 @@ class Group17Character(CharacterEntity):
 
     def variant3(self):
         """ Run AI Variant 3"""
-        if self.check_for_direct_route():
+        if self.check_for_direct_route(1):
             self.state = 3
         elif self._check_for_monster(2):
             self.state = 1
         if self.state == 0:
             self.perform_a_star(True)
         elif self.state == 1:
-            self.perform_expectimax(5, 2)
+            self.perform_expectimax(4, 2)
         elif self.state == 2:
             self.bomb_state()
         elif self.state == 3:
@@ -100,14 +100,14 @@ class Group17Character(CharacterEntity):
 
     def variant4(self):
         """ Run AI Variant 4"""
-        if self.check_for_direct_route():
+        if self.check_for_direct_route(1):
             self.state = 3
         elif self._check_for_monster(3):
             self.state = 1
         if self.state == 0:
             self.perform_a_star(True)
         elif self.state == 1:
-            self.perform_expectimax(5, 3)
+            self.perform_expectimax(4, 3)
         elif self.state == 2:
             self.bomb_state()
         elif self.state == 3:
@@ -115,14 +115,17 @@ class Group17Character(CharacterEntity):
 
     def variant5(self):
         """ Run AI Variant 5"""
-        if self.check_for_direct_route():
+        if self.check_for_direct_route(1):
             self.state = 3
         elif self._check_for_monster(3):
             self.state = 1
         if self.state == 0:
             self.perform_a_star(True)
         elif self.state == 1:
-            self.perform_mini_max(5, 3)
+            if self.get_closest_monster() == "stupid":
+                self.perform_expectimax(4, 3)
+            else:
+                self.perform_mini_max(4, 3)
         elif self.state == 2:
             self.bomb_state()
         elif self.state == 3:
@@ -206,10 +209,10 @@ class Group17Character(CharacterEntity):
 
         monster = None
         if self.world.monsters:
-            monsters = next(iter(self.world.monsters.values()))
-            for m in monsters:
-                if m.name == "aggressive":
-                    monster = m
+            for value in self.world.monsters.values():
+                for m in value:
+                    if m.name == "aggressive":
+                        monster = m
         Minimax = minimax.Minimax(self, depth, monster)
         move = Minimax.alpha_beta_search(self.world)
         if move[0] != 0 or move[1] != 0:
@@ -239,8 +242,10 @@ class Group17Character(CharacterEntity):
                     for dy in [-1, 1]:
                         if (start_y + dy >= 0) and (start_y + dy < self.world.height()):
                             if not self.world.wall_at(start_x + dx, start_y + dy):
-                                self.bomb_move = 1
-                                self.move(dx, dy)
+                                if not self.world.bomb_at(start_x + dx, start_y + dy) \
+                                        and not self.world.explosion_at(start_x + dx, start_y + dy):
+                                    self.bomb_move = 1
+                                    self.move(dx, dy)
         else:
             if not self.world.bomb_at(self.bomb_at[0], self.bomb_at[1]):
                 if not self.world.explosion_at(self.bomb_at[0], self.bomb_at[1] + 1):
@@ -248,19 +253,31 @@ class Group17Character(CharacterEntity):
                     self.bomb_move = 0
             self.move(0, 0)
 
-    def check_for_direct_route(self):
+    def check_for_direct_route(self, limit) -> bool:
         if self._check_for_monster(2):
             return False
-        if self.world.monsters:
-            monsters = next(iter(self.world.monsters.values()))
-            for m in monsters:
-                if m.y >= self.y:
-                    return False
         a_star = astar.Astar(self.world)
         current_location = (self.x, self.y)
         goal = self.world.exitcell
-        next_move = a_star.get_a_star(current_location, goal, count_walls=False, scary_monsters=False)
-        if len(next_move) == 0:
+        next_moves = a_star.get_a_star(current_location, goal, count_walls=False, scary_monsters=False)
+        if len(next_moves) == 0:
             return False
+        for next_move in next_moves:
+            if self.world.monsters:
+                for value in self.world.monsters.values():
+                    for m in value:
+                        if abs(m.x - next_move[0]) <= limit and abs(m.y - next_move[1]) <= limit:
+                            return False
         return True
+
+    def get_closest_monster(self) -> str:
+        closest_monster = None
+        closest_range = 100
+        for value in self.world.monsters.values():
+            for m in value:
+                distance = ((m.x - self.x) ** 2 + (m.y - self.y) ** 2) ** 0.5
+                if distance < closest_range:
+                    closest_monster = m.name
+                    closest_range = distance
+        return closest_monster
 
