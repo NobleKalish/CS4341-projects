@@ -65,7 +65,7 @@ class Expectimax:
         a_star = astar.Astar(self.world)
         next_move = a_star.get_a_star(start, goal, count_walls=count_walls, scary_monsters=True)
         return len(next_move) - 1
-        ############ FOR THE MOMENT TO MAKE THINGS FASTER #####################
+        ############ UNCOMMENT BELOW TO MAKE THINGS FASTER #####################
         # x = goal[0] - start[0]
         # y = goal[1] - start[1]
         # return (x**2 + y**2)**0.5
