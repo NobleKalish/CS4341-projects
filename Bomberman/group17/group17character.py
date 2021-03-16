@@ -122,10 +122,11 @@ class Group17Character(CharacterEntity):
         if self.state == 0:
             self.perform_a_star(True)
         elif self.state == 1:
-            if self.get_closest_monster() == "stupid":
-                self.perform_expectimax(4, 3)
-            else:
-                self.perform_mini_max(4, 3)
+            self.perform_expectimax(4, 3)
+            # if self.get_closest_monster() == "stupid":
+            #     self.perform_expectimax(4, 3)
+            # else:
+            #     self.perform_mini_max(4, 3)
         elif self.state == 2:
             self.bomb_state()
         elif self.state == 3:
@@ -218,10 +219,9 @@ class Group17Character(CharacterEntity):
         if move[0] != 0 or move[1] != 0:
             self.move(move[0], move[1])
         else:
-            self.state = 2
+            self.state = 1
             self.bomb_at = (self.x, self.y)
             self.place_bomb()
-            self.bomb_state()
         if not self._check_for_monster(limit):
             if self.bomb_move == 1:
                 self.state = 2

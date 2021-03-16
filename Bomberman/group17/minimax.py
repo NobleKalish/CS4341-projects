@@ -61,6 +61,8 @@ class Minimax:
         # If node is terminal, than we have lost
         if not world.me(self.character):
             return -math.inf
+        if Event.CHARACTER_FOUND_EXIT in events:
+            return math.inf
         # If depth = 0, than we need to use the heuristic
         if depth == 0:
             return self.get_evaluation(world, events)

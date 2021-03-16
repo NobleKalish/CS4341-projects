@@ -49,28 +49,6 @@ class Expectimax:
             8: (0, 0)
         }
 
-    def _get_neighbors(self, current) -> list[tuple[int, int]]:
-        """ Find all adjacent spaces legal to move into.  Out of bounds spaces and walls are excluded.
-
-            Parameters:
-                current (tuple[int, int]): The space currently being occupied in the form [x,y]
-
-            Returns:
-                neighbors: The list of all neighboring spaces legal to move into
-        """
-
-        # TODO: Why isn't this used in the get actions helper functions?
-        neighbors = list()
-        for x in [-1, 0, 1]:
-            for y in [-1, 0, 1]:
-                if x != 0 or y != 0:
-                    new_x = current[0] + x
-                    new_y = current[1] + y
-                    if (new_y >= 0) and (new_y < self.world.height()) and (new_x >= 0) and (new_x < self.world.width()):
-                        if not self.world.wall_at(new_x, new_y):
-                            neighbors.append((new_x, new_y))
-        return neighbors
-
     def _heuristic(self, goal, count_walls):
         """ Evaluate the current board state and assign a score based on distance to goal
 
@@ -121,8 +99,11 @@ class Expectimax:
         """
 
         depth += 1
+        check_events = self._check_events(events)
+        if check_events == math.inf or check_events == -math.inf:
+            return check_events
         if not new_world.me(self.character):
-            return -10000
+            return -math.inf
         if depth >= self.max_depth:
             return self._utility(new_world, events)
         v = 0
@@ -145,8 +126,11 @@ class Expectimax:
         """
 
         depth += 1
+        check_events = self._check_events(events)
+        if check_events == math.inf or check_events == -math.inf:
+            return check_events
         if not new_world.me(self.character):
-            return -10000
+            return -math.inf
         if depth >= self.max_depth:
             return self._utility(new_world, events)
         v = -math.inf
@@ -168,18 +152,7 @@ class Expectimax:
                 utility: The assigned score based on all evaluated factors
         """
 
-        utility = 0
-        for event in events:
-            if event.tpe == Event.BOMB_HIT_MONSTER:
-                utility += 50
-            elif event.tpe == Event.BOMB_HIT_CHARACTER:
-                return -10000
-            elif event.tpe == Event.CHARACTER_KILLED_BY_MONSTER:
-                return -10000
-            elif event.tpe == Event.CHARACTER_FOUND_EXIT:
-                return 10000
-            elif event.tpe == Event.BOMB_HIT_WALL:
-                utility += 5
+        utility = self._check_events(events)
         if world.me(self.character):
             utility += 100 - self._heuristic(world.exitcell, True)
         else:
@@ -189,7 +162,7 @@ class Expectimax:
         if world.monsters:
             for value in self.world.monsters.values():
                 for m in value:
-                    utility -= 1000 - 100*(self._heuristic((m.x, m.y), False))
+                    utility -= 100 - (self._heuristic((m.x, m.y), False))
         return utility
 
     def _get_player_actions(self, world) -> list[tuple[tuple[int, int], SensedWorld, list[Event]]]:
@@ -257,3 +230,18 @@ class Expectimax:
                                 (new_world, events) = fake_world.next()
                                 actions_and_worlds.append(((dx, dy), new_world, events))
         return actions_and_worlds
+
+    def _check_events(self, events):
+        utility = 0
+        for event in events:
+            if event.tpe == Event.BOMB_HIT_MONSTER:
+                utility += 50
+            elif event.tpe == Event.BOMB_HIT_CHARACTER:
+                return math.inf
+            elif event.tpe == Event.CHARACTER_KILLED_BY_MONSTER:
+                return -math.inf
+            elif event.tpe == Event.CHARACTER_FOUND_EXIT:
+                return math.inf
+            elif event.tpe == Event.BOMB_HIT_WALL:
+                utility += 5
+        return utility

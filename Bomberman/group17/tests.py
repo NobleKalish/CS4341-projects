@@ -101,7 +101,7 @@ def variant5(g):
 
 
 def main():
-    test_amount = 10
+    test_amount = 20
     wins1 = 0
     wins2 = 0
     wins3 = 0
@@ -156,7 +156,7 @@ def main():
     print(f'We won {wins2} out of {test_amount} for variant 2')
     print(f'We won {wins3} out of {test_amount} for variant 3')
     print(f'We won {wins4} out of {test_amount} for variant 4')
-    print(f'We won {wins5} out of {test_amount} for variant 5')
+    print(f'We won {wins5} out of {test_amount} for variant 5\n\n')
     print(f'We won {wins1_2} out of {test_amount} for variant 1_2')
     print(f'We won {wins2_2} out of {test_amount} for variant 2_2')
     print(f'We won {wins3_2} out of {test_amount} for variant 3_2')
