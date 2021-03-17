@@ -11,6 +11,7 @@ from monsters.selfpreserving_monster import SelfPreservingMonster
 
 step = 1
 
+
 def variant1(g):
     g.add_character(Group17Character("me",  # name
                                      "C",  # avatar

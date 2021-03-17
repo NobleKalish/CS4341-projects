@@ -84,10 +84,11 @@ class Astar:
                 for dy in [-1, 0, 1]:
                     if dx != 0 or dy != 0:
                         if (current[1] + dy >= 0) and (current[1] + dy < self.world.height()):
-                            if not self.world.wall_at(current[0] + dx, current[1] + dy):
-                                neighbors.append(((current[0] + dx, current[1] + dy), 0))
-                            else:
-                                neighbors.append(((current[0] + dx, current[1] + dy), 1))
+                            if not self.world.explosion_at(current[0] + dx, current[1] + dy):
+                                if not self.world.wall_at(current[0] + dx, current[1] + dy):
+                                    neighbors.append(((current[0] + dx, current[1] + dy), 0))
+                                else:
+                                    neighbors.append(((current[0] + dx, current[1] + dy), 1))
         return neighbors
 
     def _get_neighbors_without_walls(self, current) -> list[tuple[tuple[int, int], int]]:
@@ -108,7 +109,8 @@ class Astar:
                 for dy in [-1, 0, 1]:
                     if dx != 0 or dy != 0:
                         if (current[1] + dy >= 0) and (current[1] + dy < self.world.height()):
-                            if not self.world.wall_at(current[0] + dx, current[1] + dy):
+                            if not self.world.wall_at(current[0] + dx, current[1] + dy) \
+                                    and not self.world.explosion_at(current[0] + dx, current[1] + dy):
                                 neighbors.append(((current[0] + dx, current[1] + dy), 0))
         return neighbors
 
@@ -126,4 +128,4 @@ class Astar:
 
         x_distance = goal[0] - neighbor[0]
         y_distance = goal[1] - neighbor[1]
-        return x_distance + y_distance
+        return (x_distance**2 + y_distance**2)**0.5

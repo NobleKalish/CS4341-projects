@@ -96,7 +96,7 @@ class Group17Character(CharacterEntity):
         if self.state == 0:
             self.perform_a_star(True)
         elif self.state == 1:
-            self.perform_expectimax(4, 3)
+            self.perform_expectimax(5, 3)
         elif self.state == 2:
             self.bomb_state()
         elif self.state == 3:
@@ -151,7 +151,11 @@ class Group17Character(CharacterEntity):
         a_star = astar.Astar(self.world)
         current_location = (self.x, self.y)
         goal = self.world.exitcell
-        next_move = a_star.get_a_star(current_location, goal, count_walls=count_walls, scary_monsters=scary_monsters)[1]
+        next_moves = a_star.get_a_star(current_location, goal, count_walls=count_walls, scary_monsters=scary_monsters)
+        if len(next_moves) == 0:
+            self.move(0, 0)
+            return
+        next_move = next_moves[1]
         if self.world.wall_at(next_move[0], next_move[1]):
             self.bomb_at = (self.x, self.y)
             self.place_bomb()
@@ -171,7 +175,6 @@ class Group17Character(CharacterEntity):
         """
 
         ex_max = expectimax.Expectimax(self.world, depth, 0.9, self)
-        ex_max.do_expectimax()
         ex_max_result = ex_max.do_expectimax()
         new_x = ex_max_result[0]
         new_y = ex_max_result[1]
@@ -182,6 +185,9 @@ class Group17Character(CharacterEntity):
             self.state = 2
         else:
             self.move(new_x, new_y)
+            if not self._check_for_monster(limit):
+                self.state = 0
+
 
     def perform_mini_max(self, depth, limit):
         """ Use Minimax to perform one move
@@ -245,6 +251,7 @@ class Group17Character(CharacterEntity):
         next_moves = a_star.get_a_star(current_location, goal, count_walls=False, scary_monsters=False)
         if len(next_moves) == 0:
             return False
+        next_moves.pop(0)
         for next_move in next_moves:
             if self.world.monsters:
                 for value in self.world.monsters.values():

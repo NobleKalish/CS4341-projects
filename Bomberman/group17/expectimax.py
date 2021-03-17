@@ -62,22 +62,22 @@ class Expectimax:
         """
         me = world.me(self.character)
         start = (me.x, me.y)
-        a_star = astar.Astar(self.world)
-        next_move = a_star.get_a_star(start, goal, count_walls=count_walls, scary_monsters=True)
-        return len(next_move) - 1
+        # a_star = astar.Astar(self.world)
+        # next_move = a_star.get_a_star(start, goal, count_walls=count_walls, scary_monsters=False)
+        # return len(next_move) - 1
         ############ UNCOMMENT BELOW TO MAKE THINGS FASTER #####################
-        # x = goal[0] - start[0]
-        # y = goal[1] - start[1]
-        # return (x**2 + y**2)**0.5
+        x = goal[0] - start[0]
+        y = goal[1] - start[1]
+        return (x**2 + y**2)**0.5
 
     def do_expectimax(self) -> tuple[int, int]:
         """ Perform expectimax and return the recommended move.
 
             Returns:
-                The recommended move in the form [x,y].  [0,0] means place a bomb
+                The recommended move in the form [xs,y].  [0,0] means place a bomb
         """
 
-        world = self.world
+        world = SensedWorld.from_world(self.world)
         actions_and_worlds = self._get_player_actions(world)
         depth = 0
         self.expecti_max = np.full(9, -math.inf)
@@ -155,13 +155,13 @@ class Expectimax:
         """
 
         utility = self._check_events(events)
-        utility -= 5*self._heuristic(world.exitcell, world, True)
-        if not self.world.monsters:
+        utility -= 50*self._heuristic(world.exitcell, world, True)
+        if not world.monsters:
             return utility
         if world.monsters:
-            for value in self.world.monsters.values():
+            for value in world.monsters.values():
                 for m in value:
-                    utility += 5*(self._heuristic((m.x, m.y), world, False))
+                    utility += 100*(self._heuristic((m.x, m.y), world, False))
         return utility
 
     def _get_player_actions(self, world) -> list[tuple[tuple[int, int], SensedWorld, list[Event]]]:
@@ -194,10 +194,10 @@ class Expectimax:
 
         fake_world = SensedWorld.from_world(world)
         actions_and_worlds = list()
-        if not self.world.monsters:
+        if not fake_world.monsters:
             return actions_and_worlds
         else:
-            for value in self.world.monsters.values():
+            for value in fake_world.monsters.values():
                 for m in value:
                     actions_and_worlds.extend(self._get_new_actions(m, fake_world))
         return actions_and_worlds
@@ -220,7 +220,8 @@ class Expectimax:
                 for dy in [-1, 0, 1]:
                     if (dx != 0) or (dy != 0):
                         if (entity.y + dy >= 0) and (entity.y + dy < fake_world.height()):
-                            if not fake_world.wall_at(entity.x + dx, entity.y + dy):
+                            if not fake_world.wall_at(entity.x + dx, entity.y + dy) \
+                                    and not fake_world.explosion_at(entity.x + dx, entity.y + dy):
                                 entity.move(dx, dy)
                                 (new_world, events) = fake_world.next()
                                 actions_and_worlds.append(((dx, dy), new_world, events))
@@ -230,7 +231,7 @@ class Expectimax:
         utility = 0
         for event in events:
             if event.tpe == Event.BOMB_HIT_MONSTER:
-                utility += 50
+                utility += 5000
             elif event.tpe == Event.BOMB_HIT_CHARACTER:
                 return math.inf
             elif event.tpe == Event.CHARACTER_KILLED_BY_MONSTER:
