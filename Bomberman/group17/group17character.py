@@ -4,8 +4,8 @@ import math
 
 sys.path.insert(0, '../bomberman')
 # Import necessary stuff
-from bomberman.entity import CharacterEntity
-from group17 import astar, expectimax, q_learning, minimax
+from Bomberman.bomberman.entity import CharacterEntity
+import astar, expectimax, q_learning, minimax
 from colorama import Fore, Back
 
 
@@ -46,7 +46,7 @@ class Group17Character(CharacterEntity):
 
     def variant1(self):
         """ Run AI Variant 1"""
-        if self.check_for_direct_route(1):
+        if self.check_for_direct_route():
             self.state = 3
         if self.state == 0:
             self.perform_a_star(False)
@@ -59,12 +59,12 @@ class Group17Character(CharacterEntity):
 
     def variant2(self):
         """ Run AI Variant 2"""
-        if self.check_for_direct_route(1):
+        if self.check_for_direct_route():
             self.state = 3
         elif self._check_for_monster(2):
             self.state = 1
         if self.state == 0:
-            self.perform_a_star(True)
+            self.perform_a_star(True, True)
         elif self.state == 1:
             self.perform_expectimax(4, 2)
         elif self.state == 2:
@@ -140,7 +140,7 @@ class Group17Character(CharacterEntity):
                     return True
         return False
 
-    def perform_a_star(self, scary_monsters, count_walls=True):
+    def perform_a_star(self, scary_monsters, count_walls):
         """ Use A* search to perform one move
 
             Parameters:
@@ -151,10 +151,13 @@ class Group17Character(CharacterEntity):
         a_star = astar.Astar(self.world)
         current_location = (self.x, self.y)
         goal = self.world.exitcell
-        next_moves = a_star.get_a_star(current_location, goal, count_walls=count_walls, scary_monsters=scary_monsters)
+        next_moves = a_star.get_a_star(current_location, goal, count_walls, scary_monsters)
         if len(next_moves) == 0:
             self.move(0, 0)
             return
+        self.field_color_reset()
+        for move in next_moves:
+            self.set_cell_color(move[0], move[1], Fore.MAGENTA + Back.MAGENTA)
         next_move = next_moves[1]
         if self.world.wall_at(next_move[0], next_move[1]):
             self.bomb_at = (self.x, self.y)
@@ -238,23 +241,45 @@ class Group17Character(CharacterEntity):
                     self.bomb_move = 0
             self.move(0, 0)
 
-    def check_for_direct_route(self, limit) -> bool:
-        if self._check_for_monster(2):
-            return False
+    # def check_for_direct_route(self, limit) -> bool:
+    #     if self._check_for_monster(2):
+    #         return False
+    #     a_star = astar.Astar(self.world)
+    #     current_location = (self.x, self.y)
+    #     goal = self.world.exitcell
+    #     next_moves = a_star.get_a_star(current_location, goal, count_walls=False, scary_monsters=False)
+    #     if len(next_moves) == 0:
+    #         return False
+    #     next_moves.pop(0)
+    #     for next_move in next_moves:
+    #         if self.world.monsters:
+    #             for value in self.world.monsters.values():
+    #                 for m in value:
+    #                     if abs(m.x - next_move[0]) <= limit and abs(m.y - next_move[1]) <= limit:
+    #                         return False
+    #     return True
+
+    def check_for_direct_route(self) -> bool:
         a_star = astar.Astar(self.world)
         current_location = (self.x, self.y)
         goal = self.world.exitcell
-        next_moves = a_star.get_a_star(current_location, goal, count_walls=False, scary_monsters=False)
-        if len(next_moves) == 0:
+        ai_next_moves = a_star.get_a_star(current_location, goal, count_walls=False, scary_monsters=False)
+        if len(ai_next_moves) == 0:
             return False
-        next_moves.pop(0)
-        for next_move in next_moves:
-            if self.world.monsters:
-                for value in self.world.monsters.values():
-                    for m in value:
-                        if abs(m.x - next_move[0]) <= limit and abs(m.y - next_move[1]) <= limit:
-                            return False
-        return True
+        ai_fast_path = len(ai_next_moves)
+        monster_fast_path = 1000
+        if self.world.monsters:
+            for value in self.world.monsters.values():
+                for m in value:
+                    m_current_location = (m.x, m.y)
+                    m_next_moves = a_star.get_a_star(m_current_location, goal, count_walls=False, scary_monsters=False)
+                    if len(m_next_moves) is not 0:
+                        if len(m_next_moves) < monster_fast_path:
+                            monster_fast_path = len(m_next_moves)
+        return ai_fast_path < monster_fast_path
+
+
+
 
     def get_closest_monster(self) -> str:
         closest_monster = None
@@ -266,4 +291,9 @@ class Group17Character(CharacterEntity):
                     closest_monster = m.name
                     closest_range = distance
         return closest_monster
+
+    def field_color_reset(self):
+        for x in range(self.world.width()):
+            for y in range(self.world.height()):
+                self.set_cell_color(x, y, Fore.BLACK + Back.BLACK)
 

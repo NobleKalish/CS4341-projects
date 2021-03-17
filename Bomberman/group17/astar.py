@@ -45,15 +45,15 @@ class Astar:
                 next_neighbors = self._get_neighbors_without_walls(current)
             for next_neighbor in next_neighbors:
                 if next_neighbor[1] == 1:  # If the neighbor is a wall
-                    new_cost = cost_so_far[current] + 3
+                    new_cost = cost_so_far[current] + 6
                 else:
                     new_cost = cost_so_far[current] + 1
                 if scary_monsters:  # Increase costs near monsters
                     if self.world.monsters:
                         for value in self.world.monsters.values():
                             for monster in value:
-                                if self._heuristic((monster.x, monster.y), next_neighbor[0]) <= 3:
-                                    new_cost += 4
+                                if self._heuristic((monster.x, monster.y), next_neighbor[0]) <= 2:
+                                    new_cost += 10
                 if next_neighbor[0] not in cost_so_far or new_cost < cost_so_far[next_neighbor[0]]:
                     cost_so_far[next_neighbor[0]] = new_cost
                     priority = new_cost + self._heuristic(goal, next_neighbor[0])
