@@ -111,7 +111,10 @@ class Expectimax:
         for action_and_world in actions_and_worlds:
             new_events = action_and_world[2]
             new_events.extend(events)
-            p = 1/len(actions_and_worlds)
+            p = 0
+            for value in self.world.monsters.values():
+                for m in value:
+                    p = 1 - (1/((self._heuristic((m.x, m.y), new_world, False))+2))**2
             v = v + p * self._get_max_value(action_and_world[1], new_events, depth)
         return v
 

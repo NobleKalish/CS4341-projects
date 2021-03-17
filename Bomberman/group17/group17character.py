@@ -111,7 +111,7 @@ class Group17Character(CharacterEntity):
         if self.state == 0:
             self.perform_a_star(True)
         elif self.state == 1:
-            self.perform_expectimax(4, 3)
+            self.perform_mini_max(4, 3)
         elif self.state == 2:
             self.bomb_state()
         elif self.state == 3:
@@ -205,19 +205,15 @@ class Group17Character(CharacterEntity):
                         monster = m
         Minimax = minimax.Minimax(self, depth, monster)
         move = Minimax.alpha_beta_search(self.world)
-        if move[0] != 0 or move[1] != 0:
-            self.move(move[0], move[1])
-        else:
-            self.state = 1
-            self.bomb_at = (self.x, self.y)
+        if move[0] == 0 and move[1] == 0:
             self.place_bomb()
-        if not self._check_for_monster(limit):
-            if self.bomb_move == 1:
-                self.state = 2
-            else:
-                self.state = 0
+            self.bomb_at = (self.x, self.y)
+            self.bomb_state()
+            self.state = 2
         else:
-            self.state = 1
+            self.move(move[0], move[1])
+            if not self._check_for_monster(limit):
+                self.state = 0
 
     def bomb_state(self):
         """ Identify the best move given a bomb is on the map

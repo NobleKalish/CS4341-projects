@@ -105,36 +105,36 @@ def variant5(g):
 
 def main():
     test_amount = 10
-    wins1 = 0
-    wins2 = 0
-    wins3 = 0
-    wins4 = 0
-    wins5 = 0
+    wins1_2 = 0
+    wins2_2 = 0
+    wins3_2 = 0
+    wins4_2 = 0
+    wins5_2 = 0
     for _ in range(test_amount):
-        g = Game.fromfile('scenario1/map.txt', sprite_dir="../bomberman/sprites/")
+        g = Game.fromfile('scenario2/map2.txt', sprite_dir="../bomberman/sprites/")
         if variant1(g):
-            wins1 += 1
+            wins1_2 += 1
     for _ in range(test_amount):
-        g = Game.fromfile('scenario1/map.txt', sprite_dir="../bomberman/sprites/")
+        g = Game.fromfile('scenario2/map2.txt', sprite_dir="../bomberman/sprites/")
         if variant2(g):
-            wins2 += 1
+            wins2_2 += 1
     for _ in range(test_amount):
-        g = Game.fromfile('scenario1/map.txt', sprite_dir="../bomberman/sprites/")
+        g = Game.fromfile('scenario2/map2.txt', sprite_dir="../bomberman/sprites/")
         if variant3(g):
-            wins3 += 1
+            wins3_2 += 1
     for _ in range(test_amount):
-        g = Game.fromfile('scenario1/map.txt', sprite_dir="../bomberman/sprites/")
+        g = Game.fromfile('scenario2/map2.txt', sprite_dir="../bomberman/sprites/")
         if variant4(g):
-            wins4 += 1
+            wins4_2 += 1
     for _ in range(test_amount):
-        g = Game.fromfile('scenario1/map.txt', sprite_dir="../bomberman/sprites/")
+        g = Game.fromfile('scenario2/map2.txt', sprite_dir="../bomberman/sprites/")
         if variant5(g):
-            wins5 += 1
-    print(f'We won {wins1} out of {test_amount} for variant 1')
-    print(f'We won {wins2} out of {test_amount} for variant 2')
-    print(f'We won {wins3} out of {test_amount} for variant 3')
-    print(f'We won {wins4} out of {test_amount} for variant 4')
-    print(f'We won {wins5} out of {test_amount} for variant 5')
+            wins5_2 += 1
+    print(f'We won {wins1_2} out of {test_amount} for variant 1_2')
+    print(f'We won {wins2_2} out of {test_amount} for variant 2_2')
+    print(f'We won {wins3_2} out of {test_amount} for variant 3_2')
+    print(f'We won {wins4_2} out of {test_amount} for variant 4_2')
+    print(f'We won {wins5_2} out of {test_amount} for variant 5_2')
 
 
 if __name__ == "__main__":
