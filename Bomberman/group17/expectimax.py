@@ -236,7 +236,7 @@ class Expectimax:
             if event.tpe == Event.BOMB_HIT_MONSTER:
                 utility += 5000
             elif event.tpe == Event.BOMB_HIT_CHARACTER:
-                return math.inf
+                return -math.inf
             elif event.tpe == Event.CHARACTER_KILLED_BY_MONSTER:
                 return -math.inf
             elif event.tpe == Event.CHARACTER_FOUND_EXIT:

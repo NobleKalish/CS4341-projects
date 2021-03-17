@@ -53,7 +53,7 @@ class Astar:
                         for value in self.world.monsters.values():
                             for monster in value:
                                 if self._heuristic((monster.x, monster.y), next_neighbor[0]) <= 3:
-                                    new_cost += 2
+                                    new_cost += 4
                 if next_neighbor[0] not in cost_so_far or new_cost < cost_so_far[next_neighbor[0]]:
                     cost_so_far[next_neighbor[0]] = new_cost
                     priority = new_cost + self._heuristic(goal, next_neighbor[0])
