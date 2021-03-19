@@ -74,18 +74,22 @@ class Group17Character(CharacterEntity):
 
     def variant3(self):
         """ Run AI Variant 3"""
-        if self.check_for_direct_route(1):
+        if self.check_for_direct_route():
             self.state = 3
         elif self._check_for_monster(2):
             self.state = 1
         if self.state == 0:
-            self.perform_a_star(True)
+            self.perform_a_star(True, True)
+            print("Moved with A*")
         elif self.state == 1:
             self.perform_expectimax(4, 2)
+            print("Moved with Expectimax")
         elif self.state == 2:
             self.bomb_state()
+            print("Moved with Bomb State")
         elif self.state == 3:
             self.perform_a_star(False, False)
+            print("Moved with Blind A*")
 
     def variant4(self):
         """ Run AI Variant 4"""
@@ -272,9 +276,11 @@ class Group17Character(CharacterEntity):
             for value in self.world.monsters.values():
                 for m in value:
                     m_current_location = (m.x, m.y)
+                    if m_current_location == goal:
+                        return False
                     m_next_moves = a_star.get_a_star(m_current_location, goal, count_walls=False, scary_monsters=False)
-                    if len(m_next_moves) is not 0:
-                        if len(m_next_moves) < monster_fast_path:
+                    if len(m_next_moves) != 0:
+                        if len(m_next_moves) < monster_fast_path - 1:
                             monster_fast_path = len(m_next_moves)
         return ai_fast_path < monster_fast_path
 
