@@ -3,6 +3,7 @@ import numpy as np
 import sys
 
 import astar
+from Bomberman.bomberman.monsters.selfpreserving_monster import SelfPreservingMonster
 
 sys.path.insert(0, '../bomberman')
 from events import Event
@@ -202,11 +203,14 @@ class Expectimax:
         else:
             for value in fake_world.monsters.values():
                 for m in value:
-                    actions_and_worlds.extend(self._get_new_actions(m, fake_world, False))
-        return actions_and_worlds
+                    is_monster_smart = False
+                    if m.name != "stupid":
+                        is_monster_smart = True
+                    actions_and_worlds.extend(self._get_new_actions(m, fake_world, False, is_monster_smart))
+            return actions_and_worlds
 
     @staticmethod
-    def _get_new_actions(entity, fake_world, avoid_bombs) -> list[tuple[tuple[int, int], SensedWorld, list[Event]]]:
+    def _get_new_actions(entity, fake_world, avoid_bombs, is_monster_smart=False) -> list[tuple[tuple[int, int], SensedWorld, list[Event]]]:
         """ Generate a list of possible moves for the selected Entity.  Doesn't include bomb placement.
 
             Parameters:
@@ -220,6 +224,18 @@ class Expectimax:
         """
 
         actions_and_worlds = list()
+        if is_monster_smart:
+            if entity.name == "aggressive":
+                rnge = 2
+            else:
+                rnge = 1
+            entity = SelfPreservingMonster(entity.name, "A", entity.x, entity.y, rnge)
+            (found, dx, dy) = entity.look_for_character(fake_world)
+            if found:
+                entity.move(dx, dy)
+                (new_world, events) = fake_world.next()
+                actions_and_worlds.append(((0, 0), new_world, events))
+                return actions_and_worlds
         for dx in [-1, 0, 1]:
             if (entity.x + dx >= 0) and (entity.x + dx < fake_world.width()):
                 for dy in [-1, 0, 1]:

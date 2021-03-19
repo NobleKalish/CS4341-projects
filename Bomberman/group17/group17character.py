@@ -49,7 +49,7 @@ class Group17Character(CharacterEntity):
         if self.check_for_direct_route():
             self.state = 3
         if self.state == 0:
-            self.perform_a_star(False)
+            self.perform_a_star(False, True)
         elif self.state == 1:
             self.perform_expectimax(5, 0)
         elif self.state == 2:
@@ -61,26 +61,15 @@ class Group17Character(CharacterEntity):
         """ Run AI Variant 2"""
         if self.check_for_direct_route():
             self.state = 3
-        elif self._check_for_monster(2):
+        elif self._check_for_monster(3):
             self.state = 1
         if self.state == 0:
-            self.perform_a_star(True, True)
-        elif self.state == 1:
-            self.perform_expectimax(4, 2)
-        elif self.state == 2:
-            self.bomb_state()
-        elif self.state == 3:
-            self.perform_a_star(False, False)
-
-    def variant3(self):
-        """ Run AI Variant 3"""
-        if self.check_for_direct_route():
-            self.state = 3
-        elif self._check_for_monster(2):
-            self.state = 1
-        if self.state == 0:
-            self.perform_a_star(True, True)
-            print("Moved with A*")
+            if self.world.bombs != {}:
+                self.perform_expectimax(4, 2)
+                print("Moved with Expectimax")
+            else:
+                self.perform_a_star(True, True)
+                print("Moved with A*")
         elif self.state == 1:
             self.perform_expectimax(4, 2)
             print("Moved with Expectimax")
@@ -91,35 +80,74 @@ class Group17Character(CharacterEntity):
             self.perform_a_star(False, False)
             print("Moved with Blind A*")
 
-    def variant4(self):
-        """ Run AI Variant 4"""
-        if self.check_for_direct_route(1):
+    def variant3(self):
+        """ Run AI Variant 3"""
+        if self.check_for_direct_route():
             self.state = 3
-        elif self._check_for_monster(3):
+        elif self._check_for_monster(4):
             self.state = 1
         if self.state == 0:
-            self.perform_a_star(True)
+            if self.world.bombs != {}:
+                self.perform_expectimax(5, 3)
+                print("Moved with Expectimax")
+            else:
+                self.perform_a_star(True, True)
+                print("Moved with A*")
         elif self.state == 1:
             self.perform_expectimax(5, 3)
+            print("Moved with Expectimax")
         elif self.state == 2:
             self.bomb_state()
+            print("Moved with Bomb State")
         elif self.state == 3:
             self.perform_a_star(False, False)
+            print("Moved with Blind A*")
 
-    def variant5(self):
-        """ Run AI Variant 5"""
-        if self.check_for_direct_route(1):
+    def variant4(self):
+        """ Run AI Variant 4"""
+        if self.check_for_direct_route():
             self.state = 3
-        elif self._check_for_monster(3):
+        elif self._check_for_monster(4):
             self.state = 1
         if self.state == 0:
-            self.perform_a_star(True)
+            if self.world.bombs != {}:
+                self.perform_expectimax(5, 4)
+                print("Moved with Expectimax")
+            else:
+                self.perform_a_star(True, True)
+                print("Moved with A*")
         elif self.state == 1:
-            self.perform_expectimax(4, 3)
+            self.perform_expectimax(5, 4)
+            print("Moved with Expectimax")
         elif self.state == 2:
             self.bomb_state()
+            print("Moved with Bomb State")
         elif self.state == 3:
             self.perform_a_star(False, False)
+            print("Moved with Blind A*")
+
+    def variant5(self):
+        """ Run AI Variant 4"""
+        if self.check_for_direct_route():
+            self.state = 3
+        elif self._check_for_monster(4):
+            self.state = 1
+        if self.state == 0:
+            if self.world.bombs != {}:
+                self.perform_expectimax(5, 4)
+                print("Moved with Expectimax")
+            else:
+                self.perform_a_star(True, True)
+                print("Moved with A*")
+        elif self.state == 1:
+            self.perform_expectimax(5, 4)
+            print("Moved with Expectimax")
+        elif self.state == 2:
+            self.bomb_state()
+            print("Moved with Bomb State")
+        elif self.state == 3:
+            self.perform_a_star(False, False)
+            print("Moved with Blind A*")
 
     def _check_for_monster(self, limit) -> bool:
         """ Check for a monster within <limit> spaces
@@ -280,9 +308,9 @@ class Group17Character(CharacterEntity):
                         return False
                     m_next_moves = a_star.get_a_star(m_current_location, goal, count_walls=False, scary_monsters=False)
                     if len(m_next_moves) != 0:
-                        if len(m_next_moves) < monster_fast_path - 1:
+                        if len(m_next_moves) < monster_fast_path:
                             monster_fast_path = len(m_next_moves)
-        return ai_fast_path < monster_fast_path
+        return ai_fast_path < monster_fast_path - 1
 
 
 
