@@ -4,7 +4,7 @@ import math
 
 sys.path.insert(0, '../bomberman')
 # Import necessary stuff
-from Bomberman.bomberman.entity import CharacterEntity
+from bomberman.entity import CharacterEntity
 import astar, expectimax, q_learning, minimax
 from colorama import Fore, Back
 

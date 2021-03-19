@@ -3,7 +3,7 @@ import numpy as np
 import sys
 
 import astar
-from Bomberman.bomberman.monsters.selfpreserving_monster import SelfPreservingMonster
+from bomberman.monsters.selfpreserving_monster import SelfPreservingMonster
 
 sys.path.insert(0, '../bomberman')
 from events import Event
