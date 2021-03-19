@@ -246,8 +246,12 @@ class Group17Character(CharacterEntity):
                 self.state = 0
 
     def check_for_bombs(self):
-        if not self.world.explosions:
+        if not self.world.explosions and not self.world.bombs:
             self.expl_cells = []
+            self.current_goal = self.world.exitcell
+            self.state = 0
+            self.bomb_move = 0
+            self.perform_expectimax(5, 3)
         for bomb in self.world.bombs.values():
             if bomb.timer <= 2:
                 for dx in range(-self.world.expl_range, self.world.expl_range):
@@ -300,15 +304,6 @@ class Group17Character(CharacterEntity):
                                     self.bomb_move = 1
                                     self.move(dx, dy)
                                     return
-        else:
-            if not self.world.bomb_at(self.bomb_at[0], self.bomb_at[1]):
-                if not self.world.explosion_at(self.bomb_at[0], self.bomb_at[1] + 1):
-                    self.expl_cells = []
-                    self.current_goal = self.world.exitcell
-                    self.state = 0
-                    self.bomb_move = 0
-                    self.perform_expectimax(5, 3)
-                    return
 
     def check_for_direct_route(self, limit) -> bool:
         # if self._check_for_monster(2):
