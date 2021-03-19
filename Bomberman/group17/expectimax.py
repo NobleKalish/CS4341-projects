@@ -3,11 +3,11 @@ import numpy as np
 import sys
 
 import astar
+from bomberman.monsters.selfpreserving_monster import SelfPreservingMonster
 
 sys.path.insert(0, '../bomberman')
 from events import Event
 from sensed_world import SensedWorld
-from monsters.selfpreserving_monster import SelfPreservingMonster
 
 
 class Expectimax:
@@ -207,7 +207,7 @@ class Expectimax:
                     if m.name != "stupid":
                         is_monster_smart = True
                     actions_and_worlds.extend(self._get_new_actions(m, fake_world, False, is_monster_smart))
-        return actions_and_worlds
+            return actions_and_worlds
 
     @staticmethod
     def _get_new_actions(entity, fake_world, avoid_bombs, is_monster_smart=False) -> list[tuple[tuple[int, int], SensedWorld, list[Event]]]:
@@ -222,6 +222,7 @@ class Expectimax:
             Returns:
                 actions_and_worlds: A list of actions in the form [[x,y], world, events]
         """
+
         actions_and_worlds = list()
         if is_monster_smart:
             if entity.name == "aggressive":
