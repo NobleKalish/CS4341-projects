@@ -49,13 +49,12 @@ class Expectimax:
             8: (0, 0)
         }
 
-    def _heuristic(self, goal, world, count_walls):
+    def _heuristic(self, goal, world):
         """ Evaluate the current board state and assign a score based on distance to goal
 
             Parameters:
                 goal (tuple[int, int]): The position of the goal in the form [x,y]
-                count_walls (bool): If True, paths through walls will be considered. This allows for planned bombing
-                    (default is True)
+                world: The current game world.  Contains the world map as well as monster and character positions.
 
             Returns:
                 The int score assigned to the board state in question
@@ -110,7 +109,7 @@ class Expectimax:
             p = 0
             for value in self.world.monsters.values():
                 for m in value:
-                    p = 1 - (1/((self._heuristic((m.x, m.y), new_world, False))+2))**2
+                    p = 1 - (1/((self._heuristic((m.x, m.y), new_world))+2))**2
             v = v + p * self._get_max_value(action_and_world[1], new_events, depth)
         return v
 
@@ -154,13 +153,13 @@ class Expectimax:
         """
 
         utility = self._check_events(events)
-        utility -= 50*self._heuristic(world.exitcell, world, True)
+        utility -= 50*self._heuristic(world.exitcell, world)
         if not world.monsters:
             return utility
         if world.monsters:
             for value in world.monsters.values():
                 for m in value:
-                    utility += 100*(self._heuristic((m.x, m.y), world, False))
+                    utility += 100*(self._heuristic((m.x, m.y), world))
         return utility
 
     def _get_player_actions(self, world) -> list[tuple[tuple[int, int], SensedWorld, list[Event]]]:
@@ -205,7 +204,8 @@ class Expectimax:
             return actions_and_worlds
 
     @staticmethod
-    def _get_new_actions(entity, fake_world, avoid_bombs, is_monster_smart=False) -> list[tuple[tuple[int, int], SensedWorld, list[Event]]]:
+    def _get_new_actions(entity, fake_world, avoid_bombs, is_monster_smart=False) \
+            -> list[tuple[tuple[int, int], SensedWorld, list[Event]]]:
         """ Generate a list of possible moves for the selected Entity.  Doesn't include bomb placement.
 
             Parameters:
@@ -213,6 +213,8 @@ class Expectimax:
                 fake_world (SensedWorld): The current world according to that entity.
                 avoid_bombs (bool): Should the entity avoid killing themselves by eliminating potential explosion
                                     squares as movement options?
+                is_monster_smart (bool): Will the monster intelligently pursue the character?
+                                         (Default is False, This is set automatically in other methods)
 
             Returns:
                 actions_and_worlds: A list of actions in the form [[x,y], world, events]
@@ -248,7 +250,15 @@ class Expectimax:
                                     actions_and_worlds.append(((dx, dy), new_world, events))
         return actions_and_worlds
 
-    def _check_events(self, events):
+    @staticmethod
+    def _check_events(events):
+        """ Check the list of events for world states that are assigned scores for calculating the heuristic.
+
+        Parameters:
+                events (list[Event]): The list of events occurring in that world (ex: bomb hit monster)
+
+        Returns: The score resulting from all events occurring that turn.
+        """
         utility = 0
         for event in events:
             if event.tpe == Event.BOMB_HIT_MONSTER:

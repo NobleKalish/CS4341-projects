@@ -65,19 +65,14 @@ class Group17Character(CharacterEntity):
         if self.state == 0:
             if self.world.bombs != {}:
                 self.perform_expectimax(4, 2)
-                print("Moved with Expectimax")
             else:
                 self.perform_a_star(True, True)
-                print("Moved with A*")
         elif self.state == 1:
             self.perform_expectimax(4, 2)
-            print("Moved with Expectimax")
         elif self.state == 2:
             self.bomb_state()
-            print("Moved with Bomb State")
         elif self.state == 3:
             self.perform_a_star(False, False)
-            print("Moved with Blind A*")
 
     def variant3(self):
         """ Run AI Variant 3"""
@@ -88,19 +83,14 @@ class Group17Character(CharacterEntity):
         if self.state == 0:
             if self.world.bombs != {}:
                 self.perform_expectimax(5, 3)
-                print("Moved with Expectimax")
             else:
                 self.perform_a_star(True, True)
-                print("Moved with A*")
         elif self.state == 1:
             self.perform_expectimax(5, 3)
-            print("Moved with Expectimax")
         elif self.state == 2:
             self.bomb_state()
-            print("Moved with Bomb State")
         elif self.state == 3:
             self.perform_a_star(False, False)
-            print("Moved with Blind A*")
 
     def variant4(self):
         """ Run AI Variant 4"""
@@ -111,19 +101,14 @@ class Group17Character(CharacterEntity):
         if self.state == 0:
             if self.world.bombs != {}:
                 self.perform_expectimax(5, 4)
-                print("Moved with Expectimax")
             else:
                 self.perform_a_star(True, True)
-                print("Moved with A*")
         elif self.state == 1:
             self.perform_expectimax(5, 4)
-            print("Moved with Expectimax")
         elif self.state == 2:
             self.bomb_state()
-            print("Moved with Bomb State")
         elif self.state == 3:
             self.perform_a_star(False, False)
-            print("Moved with Blind A*")
 
     def variant5(self):
         """ Run AI Variant 4"""
@@ -134,19 +119,14 @@ class Group17Character(CharacterEntity):
         if self.state == 0:
             if self.world.bombs != {}:
                 self.perform_expectimax(5, 4)
-                print("Moved with Expectimax")
             else:
                 self.perform_a_star(True, True)
-                print("Moved with A*")
         elif self.state == 1:
             self.perform_expectimax(5, 4)
-            print("Moved with Expectimax")
         elif self.state == 2:
             self.bomb_state()
-            print("Moved with Bomb State")
         elif self.state == 3:
             self.perform_a_star(False, False)
-            print("Moved with Blind A*")
 
     def _check_for_monster(self, limit) -> bool:
         """ Check for a monster within <limit> spaces
@@ -186,9 +166,6 @@ class Group17Character(CharacterEntity):
         if len(next_moves) == 0:
             self.move(0, 0)
             return
-        self.field_color_reset()
-        for move in next_moves:
-            self.set_cell_color(move[0], move[1], Fore.MAGENTA + Back.MAGENTA)
         next_move = next_moves[1]
         if self.world.wall_at(next_move[0], next_move[1]):
             self.bomb_at = (self.x, self.y)
@@ -246,6 +223,12 @@ class Group17Character(CharacterEntity):
             self.move(0, 0)
 
     def check_for_direct_route(self) -> bool:
+        """ Check if the charater is closer to the goal than any monster and there's a clear path to said goal.
+
+            Returns: True if the character can safely run straight to the goal.  Requires a path two shorter than
+                     the closest monster
+        """
+
         a_star = astar.Astar(self.world)
         current_location = (self.x, self.y)
         goal = self.world.exitcell
@@ -266,10 +249,9 @@ class Group17Character(CharacterEntity):
                             monster_fast_path = len(m_next_moves)
         return ai_fast_path < monster_fast_path - 1
 
-
-
-
     def get_closest_monster(self) -> str:
+        """ Find the closest monster and return it's name as a string"""
+
         closest_monster = None
         closest_range = 100
         for value in self.world.monsters.values():
@@ -279,9 +261,4 @@ class Group17Character(CharacterEntity):
                     closest_monster = m.name
                     closest_range = distance
         return closest_monster
-
-    def field_color_reset(self):
-        for x in range(self.world.width()):
-            for y in range(self.world.height()):
-                self.set_cell_color(x, y, Fore.BLACK + Back.BLACK)
 

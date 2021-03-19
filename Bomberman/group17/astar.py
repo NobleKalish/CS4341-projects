@@ -66,7 +66,6 @@ class Astar:
             path.insert(0, came_from.get(path[0]))
         return path
 
-
     def _get_neighbors(self, current) -> list[tuple[tuple[int, int], int]]:
         """ Find all neighboring positions including walls
 
