@@ -1,11 +1,10 @@
 # This is necessary to find the main code
 import sys
-import math
 
 sys.path.insert(0, '../bomberman')
 # Import necessary stuff
-from bomberman.entity import CharacterEntity
-import astar, expectimax, q_learning, minimax
+from entity import CharacterEntity
+import astar, expectimax
 from colorama import Fore, Back
 
 
@@ -223,33 +222,6 @@ class Group17Character(CharacterEntity):
             if not self._check_for_monster(limit):
                 self.state = 0
 
-
-    def perform_mini_max(self, depth, limit):
-        """ Use Minimax to perform one move
-
-            Parameters:
-                depth (int): The depth to perform minimax to.
-                limit (int): The radius to check for monsters when determining the next state.
-        """
-
-        monster = None
-        if self.world.monsters:
-            for value in self.world.monsters.values():
-                for m in value:
-                    if m.name == "aggressive":
-                        monster = m
-        Minimax = minimax.Minimax(self, depth, monster)
-        move = Minimax.alpha_beta_search(self.world)
-        if move[0] == 0 and move[1] == 0:
-            self.place_bomb()
-            self.bomb_at = (self.x, self.y)
-            self.bomb_state()
-            self.state = 2
-        else:
-            self.move(move[0], move[1])
-            if not self._check_for_monster(limit):
-                self.state = 0
-
     def bomb_state(self):
         """ Identify the best move given a bomb is on the map
         """
@@ -272,24 +244,6 @@ class Group17Character(CharacterEntity):
                     self.state = 0
                     self.bomb_move = 0
             self.move(0, 0)
-
-    # def check_for_direct_route(self, limit) -> bool:
-    #     if self._check_for_monster(2):
-    #         return False
-    #     a_star = astar.Astar(self.world)
-    #     current_location = (self.x, self.y)
-    #     goal = self.world.exitcell
-    #     next_moves = a_star.get_a_star(current_location, goal, count_walls=False, scary_monsters=False)
-    #     if len(next_moves) == 0:
-    #         return False
-    #     next_moves.pop(0)
-    #     for next_move in next_moves:
-    #         if self.world.monsters:
-    #             for value in self.world.monsters.values():
-    #                 for m in value:
-    #                     if abs(m.x - next_move[0]) <= limit and abs(m.y - next_move[1]) <= limit:
-    #                         return False
-    #     return True
 
     def check_for_direct_route(self) -> bool:
         a_star = astar.Astar(self.world)

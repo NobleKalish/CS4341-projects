@@ -1,6 +1,6 @@
 import sys
 import random
-from group17.group17character import Group17Character
+from group17character import Group17Character
 
 sys.path.insert(0, '../bomberman')
 
