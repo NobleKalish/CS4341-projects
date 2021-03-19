@@ -2,12 +2,12 @@ import math
 import numpy as np
 import sys
 
-from bomberman.monsters.selfpreserving_monster import SelfPreservingMonster
-from group17 import astar
+import astar
 
 sys.path.insert(0, '../bomberman')
-from bomberman.events import Event
-from bomberman.sensed_world import SensedWorld
+from events import Event
+from sensed_world import SensedWorld
+from monsters.selfpreserving_monster import SelfPreservingMonster
 
 
 class Expectimax:
@@ -115,7 +115,7 @@ class Expectimax:
             p = 0
             for value in self.world.monsters.values():
                 for m in value:
-                    p = 1 - (1/((self._heuristic((m.x, m.y), new_world, False))+2))
+                    p = 1 - (1/((self._heuristic((m.x, m.y), new_world, False))+2))**2
             v = v + p * self._get_max_value(action_and_world[1], new_events, depth)
         return v
 
@@ -180,7 +180,7 @@ class Expectimax:
 
         fake_world = SensedWorld.from_world(world)
         m = fake_world.me(self.character)
-        player_actions = self._get_new_actions(m, fake_world)
+        player_actions = self._get_new_actions(m, fake_world, True)
         m.place_bomb()
         (new_world, events) = fake_world.next()
         player_actions.append(((0, 0), new_world, events))
@@ -206,21 +206,22 @@ class Expectimax:
                     is_monster_smart = False
                     if m.name != "stupid":
                         is_monster_smart = True
-                    actions_and_worlds.extend(self._get_new_actions(m, fake_world, is_monster_smart))
+                    actions_and_worlds.extend(self._get_new_actions(m, fake_world, False, is_monster_smart))
         return actions_and_worlds
 
     @staticmethod
-    def _get_new_actions(entity, fake_world, is_monster_smart=False) -> list[tuple[tuple[int, int], SensedWorld, list[Event]]]:
+    def _get_new_actions(entity, fake_world, avoid_bombs, is_monster_smart=False) -> list[tuple[tuple[int, int], SensedWorld, list[Event]]]:
         """ Generate a list of possible moves for the selected Entity.  Doesn't include bomb placement.
 
             Parameters:
                 entity (entity): The character or monster whose possible moves are being looked for.
                 fake_world (SensedWorld): The current world according to that entity.
+                avoid_bombs (bool): Should the entity avoid killing themselves by eliminating potential explosion
+                                    squares as movement options?
 
             Returns:
                 actions_and_worlds: A list of actions in the form [[x,y], world, events]
         """
-
         actions_and_worlds = list()
         if is_monster_smart:
             if entity.name == "aggressive":
@@ -239,11 +240,16 @@ class Expectimax:
                 for dy in [-1, 0, 1]:
                     if (dx != 0) or (dy != 0):
                         if (entity.y + dy >= 0) and (entity.y + dy < fake_world.height()):
-                            if not fake_world.wall_at(entity.x + dx, entity.y + dy) \
-                                    and not fake_world.explosion_at(entity.x + dx, entity.y + dy):
-                                entity.move(dx, dy)
-                                (new_world, events) = fake_world.next()
-                                actions_and_worlds.append(((dx, dy), new_world, events))
+                            if not fake_world.wall_at(entity.x + dx, entity.y + dy):
+                                if avoid_bombs:  # This means that stupid monsters won't ignore explosions
+                                    if not fake_world.explosion_at(entity.x + dx, entity.y + dy):
+                                        entity.move(dx, dy)
+                                        (new_world, events) = fake_world.next()
+                                        actions_and_worlds.append(((dx, dy), new_world, events))
+                                else:
+                                    entity.move(dx, dy)
+                                    (new_world, events) = fake_world.next()
+                                    actions_and_worlds.append(((dx, dy), new_world, events))
         return actions_and_worlds
 
     def _check_events(self, events):
