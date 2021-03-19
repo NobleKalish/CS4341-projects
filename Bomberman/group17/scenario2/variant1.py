@@ -12,7 +12,7 @@ sys.path.insert(1, '../group17')
 from group17character import Group17Character
 
 # Create the game
-g = Game.fromfile('../scenario2/map2.txt')
+g = Game.fromfile('../scenario2/map.txt')
 
 # TODO Add your character
 g.add_character(Group17Character("me",  # name

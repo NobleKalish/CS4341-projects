@@ -2,10 +2,9 @@ import math
 import numpy as np
 import sys
 
-import astar
-from bomberman.monsters.selfpreserving_monster import SelfPreservingMonster
 
 sys.path.insert(0, '../bomberman')
+from monsters.selfpreserving_monster import SelfPreservingMonster
 from events import Event
 from sensed_world import SensedWorld
 
@@ -63,10 +62,6 @@ class Expectimax:
         """
         me = world.me(self.character)
         start = (me.x, me.y)
-        # a_star = astar.Astar(self.world)
-        # next_move = a_star.get_a_star(start, goal, count_walls=count_walls, scary_monsters=False)
-        # return len(next_move) - 1
-        ############ UNCOMMENT BELOW TO MAKE THINGS FASTER #####################
         x = goal[0] - start[0]
         y = goal[1] - start[1]
         return (x**2 + y**2)**0.5

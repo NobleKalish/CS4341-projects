@@ -111,23 +111,23 @@ def main():
     wins4_2 = 0
     wins5_2 = 0
     for _ in range(test_amount):
-        g = Game.fromfile('scenario2/map2.txt', sprite_dir="../bomberman/sprites/")
+        g = Game.fromfile('scenario2/map.txt', sprite_dir="../bomberman/sprites/")
         if variant1(g):
             wins1_2 += 1
     for _ in range(test_amount):
-        g = Game.fromfile('scenario2/map2.txt', sprite_dir="../bomberman/sprites/")
+        g = Game.fromfile('scenario2/map.txt', sprite_dir="../bomberman/sprites/")
         if variant2(g):
             wins2_2 += 1
     for _ in range(test_amount):
-        g = Game.fromfile('scenario2/map2.txt', sprite_dir="../bomberman/sprites/")
+        g = Game.fromfile('scenario2/map.txt', sprite_dir="../bomberman/sprites/")
         if variant3(g):
             wins3_2 += 1
     for _ in range(test_amount):
-        g = Game.fromfile('scenario2/map2.txt', sprite_dir="../bomberman/sprites/")
+        g = Game.fromfile('scenario2/map.txt', sprite_dir="../bomberman/sprites/")
         if variant4(g):
             wins4_2 += 1
     for _ in range(test_amount):
-        g = Game.fromfile('scenario2/map2.txt', sprite_dir="../bomberman/sprites/")
+        g = Game.fromfile('scenario2/map.txt', sprite_dir="../bomberman/sprites/")
         if variant5(g):
             wins5_2 += 1
     print(f'We won {wins1_2} out of {test_amount} for variant 1_2')

@@ -14,7 +14,7 @@ from group17character import Group17Character
 
 # Create the game
 random.seed(123) # TODO Change this if you want different random choices
-g = Game.fromfile('map2.txt')
+g = Game.fromfile('map.txt')
 g.add_monster(SelfPreservingMonster("aggressive", # name
                                     "A",          # avatar
                                     3, 13,        # position
