@@ -25,6 +25,7 @@ class Group17Character(CharacterEntity):
         self.bomb_move = 0
         self.bomb_at = None
         self.world = None
+        self.expl_cells = []
         self.variant_solutions = {
             1: self.variant1,
             2: self.variant2,
@@ -33,6 +34,7 @@ class Group17Character(CharacterEntity):
             5: self.variant5
         }
         self.state = 0
+        self.current_goal = None
 
     def do(self, wrld):
         """ Run the specified AI variant
@@ -41,17 +43,18 @@ class Group17Character(CharacterEntity):
         """
 
         self.world = wrld
+        self.current_goal = self.world.exitcell
         func = self.variant_solutions.get(self.variant)
         func()
 
     def variant1(self):
         """ Run AI Variant 1"""
-        if self.check_for_direct_route(1):
+        if self.check_for_bombs():
+            self.state = 2
+        elif self.check_for_direct_route(1):
             self.state = 3
         if self.state == 0:
             self.perform_a_star(False)
-        elif self.state == 1:
-            self.perform_expectimax(5, 0)
         elif self.state == 2:
             self.bomb_state()
         elif self.state == 3:
@@ -59,10 +62,17 @@ class Group17Character(CharacterEntity):
 
     def variant2(self):
         """ Run AI Variant 2"""
-        if self.check_for_direct_route(1):
+        if self.check_for_bombs():
+            self.state = 2
+        elif self.check_for_direct_route(1):
             self.state = 3
         elif self._check_for_monster(2):
-            self.state = 1
+            if self.bomb_move == 0:
+                self.place_bomb()
+                self.bomb_at = (self.x, self.y)
+                self.state = 2
+            else:
+                self.state = 1
         if self.state == 0:
             self.perform_a_star(True)
         elif self.state == 1:
@@ -74,10 +84,17 @@ class Group17Character(CharacterEntity):
 
     def variant3(self):
         """ Run AI Variant 3"""
-        if self.check_for_direct_route(1):
+        if self.check_for_bombs():
+            self.state = 2
+        elif self.check_for_direct_route(1):
             self.state = 3
         elif self._check_for_monster(2):
-            self.state = 1
+            if self.bomb_move == 0:
+                self.place_bomb()
+                self.bomb_at = (self.x, self.y)
+                self.state = 2
+            else:
+                self.state = 1
         if self.state == 0:
             self.perform_a_star(True)
         elif self.state == 1:
@@ -89,10 +106,17 @@ class Group17Character(CharacterEntity):
 
     def variant4(self):
         """ Run AI Variant 4"""
-        if self.check_for_direct_route(1):
+        if self.check_for_bombs():
+            self.state = 2
+        elif self.check_for_direct_route(1):
             self.state = 3
         elif self._check_for_monster(3):
-            self.state = 1
+            if self.bomb_move == 0:
+                self.place_bomb()
+                self.bomb_at = (self.x, self.y)
+                self.state = 2
+            else:
+                self.state = 1
         if self.state == 0:
             self.perform_a_star(True)
         elif self.state == 1:
@@ -104,10 +128,17 @@ class Group17Character(CharacterEntity):
 
     def variant5(self):
         """ Run AI Variant 5"""
-        if self.check_for_direct_route(1):
+        if self.check_for_bombs():
+            self.state = 2
+        elif self.check_for_direct_route(1):
             self.state = 3
         elif self._check_for_monster(3):
-            self.state = 1
+            if self.bomb_move == 0:
+                self.place_bomb()
+                self.bomb_at = (self.x, self.y)
+                self.state = 2
+            else:
+                self.state = 1
         if self.state == 0:
             self.perform_a_star(True)
         elif self.state == 1:
@@ -136,7 +167,7 @@ class Group17Character(CharacterEntity):
                 next_move = a_star.get_a_star(start, (m.x, m.y), False, False)
                 if len(next_move) == 0:
                     return False
-                elif len(next_move)-1 <= limit:
+                elif len(next_move) - 1 <= limit:
                     return True
         return False
 
@@ -150,15 +181,15 @@ class Group17Character(CharacterEntity):
 
         a_star = astar.Astar(self.world)
         current_location = (self.x, self.y)
-        goal = self.world.exitcell
-        next_moves = a_star.get_a_star(current_location, goal, count_walls=count_walls, scary_monsters=scary_monsters)
+        next_moves = a_star.get_a_star(current_location, self.current_goal, count_walls=count_walls,
+                                       scary_monsters=scary_monsters)
         if len(next_moves) == 0:
             self.move(0, 0)
             return
         next_move = next_moves[1]
         if self.world.wall_at(next_move[0], next_move[1]):
-            self.bomb_at = (self.x, self.y)
             self.place_bomb()
+            self.bomb_at = (self.x, self.y)
             self.bomb_state()
             self.state = 2
         else:
@@ -188,7 +219,6 @@ class Group17Character(CharacterEntity):
             if not self._check_for_monster(limit):
                 self.state = 0
 
-
     def perform_mini_max(self, depth, limit):
         """ Use Minimax to perform one move
 
@@ -215,46 +245,105 @@ class Group17Character(CharacterEntity):
             if not self._check_for_monster(limit):
                 self.state = 0
 
+    def check_for_bombs(self):
+        if not self.world.explosions:
+            self.expl_cells = []
+        for bomb in self.world.bombs.values():
+            if bomb.timer <= 2:
+                for dx in range(-self.world.expl_range, self.world.expl_range):
+                    self.expl_cells.append((bomb.x + dx, bomb.y))
+                for dy in range(-self.world.expl_range, self.world.expl_range):
+                    self.expl_cells.append((bomb.x, bomb.y, dy))
+        if (self.x, self.y) in self.expl_cells:
+            return True
+        return False
+
+    def closer_to_monster(self, new_x, new_y):
+        if not self.world.monsters:
+            return False
+        for value in self.world.monsters.values():
+            for m in value:
+                a_star = astar.Astar(self.world)
+                next_move = a_star.get_a_star((new_x, new_y), (m.x, m.y), False, False)
+                if len(next_move) == 0:
+                    return False
+                elif len(next_move) - 1 <= 2:
+                    return True
+        return False
+
     def bomb_state(self):
         """ Identify the best move given a bomb is on the map
         """
 
         start_x = self.x
         start_y = self.y
-        if self.bomb_move == 0:
-            for dx in [-1, 1]:
+        if (self.x, self.y) in self.expl_cells:
+            for dx in [-1, 0, 1]:
                 if (start_x + dx >= 0) and (start_x + dx < self.world.width()):
-                    for dy in [-1, 1]:
-                        if (start_y + dy >= 0) and (start_y + dy < self.world.height()):
+                    for dy in [-1, 0, 1]:
+                        if (start_y + dy >= 0) and (start_y + dy < self.world.height()) and ((dx != 0) or (dy != 0)):
+                            if not self.world.wall_at(start_x + dx, start_y + dy):
+                                if not (start_x + dx, start_y + dy) in self.expl_cells:
+                                    if not self.closer_to_monster(start_x + dx, start_y + dy):
+                                        self.move(dx, dy)
+                                        return
+        if self.bomb_move == 0:
+            for dx in [-1, 0, 1]:
+                if (start_x + dx >= 0) and (start_x + dx < self.world.width()):
+                    for dy in [-1, 0, 1]:
+                        if (start_y + dy >= 0) and (start_y + dy < self.world.height()) and (dx != 0 and dy != 0):
                             if not self.world.wall_at(start_x + dx, start_y + dy):
                                 if not self.world.bomb_at(start_x + dx, start_y + dy) \
-                                        and not self.world.explosion_at(start_x + dx, start_y + dy):
+                                        and not self.world.explosion_at(start_x + dx, start_y + dy) \
+                                        and not self.closer_to_monster(start_x + dx, start_y + dy)\
+                                        and not (start_x + dx, start_y + dy) in self.expl_cells:
                                     self.bomb_move = 1
                                     self.move(dx, dy)
+                                    return
         else:
             if not self.world.bomb_at(self.bomb_at[0], self.bomb_at[1]):
                 if not self.world.explosion_at(self.bomb_at[0], self.bomb_at[1] + 1):
+                    self.expl_cells = []
+                    self.current_goal = self.world.exitcell
                     self.state = 0
                     self.bomb_move = 0
-            self.move(0, 0)
+                    self.perform_expectimax(5, 3)
+                    return
 
     def check_for_direct_route(self, limit) -> bool:
-        if self._check_for_monster(2):
-            return False
+        # if self._check_for_monster(2):
+        #     return False
+        # a_star = astar.Astar(self.world)
+        # current_location = (self.x, self.y)
+        # goal = self.world.exitcell
+        # next_moves = a_star.get_a_star(current_location, goal, count_walls=False, scary_monsters=False)
+        # if len(next_moves) == 0:
+        #     return False
+        # next_moves.pop(0)
+        # for next_move in next_moves:
+        #     if self.world.monsters:
+        #         for value in self.world.monsters.values():
+        #             for m in value:
+        #                 if abs(m.x - next_move[0]) <= limit and abs(m.y - next_move[1]) <= limit:
+        #                     return False
+        # return True
         a_star = astar.Astar(self.world)
         current_location = (self.x, self.y)
         goal = self.world.exitcell
-        next_moves = a_star.get_a_star(current_location, goal, count_walls=False, scary_monsters=False)
-        if len(next_moves) == 0:
+        ai_next_moves = a_star.get_a_star(current_location, goal, count_walls=False, scary_monsters=False)
+        if len(ai_next_moves) == 0:
             return False
-        next_moves.pop(0)
-        for next_move in next_moves:
-            if self.world.monsters:
-                for value in self.world.monsters.values():
-                    for m in value:
-                        if abs(m.x - next_move[0]) <= limit and abs(m.y - next_move[1]) <= limit:
-                            return False
-        return True
+        ai_fast_path = len(ai_next_moves)
+        monster_fast_path = 1000
+        if self.world.monsters:
+            for value in self.world.monsters.values():
+                for m in value:
+                    m_current_location = (m.x, m.y)
+                    m_next_moves = a_star.get_a_star(m_current_location, goal, count_walls=False, scary_monsters=False)
+                    if len(m_next_moves) is not 0:
+                        if len(m_next_moves) < monster_fast_path:
+                            monster_fast_path = len(m_next_moves)
+        return ai_fast_path < monster_fast_path
 
     def get_closest_monster(self) -> str:
         closest_monster = None
@@ -266,4 +355,3 @@ class Group17Character(CharacterEntity):
                     closest_monster = m.name
                     closest_range = distance
         return closest_monster
-
